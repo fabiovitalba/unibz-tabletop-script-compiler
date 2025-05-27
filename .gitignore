@@ -50,3 +50,16 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# C files created from YACC and LEX
+*.c
+*.h
+*.output
+*.o
+
+# OS Files
+.DS_Store
+
+# IDEs
+.idea/*
+.vscode/*
