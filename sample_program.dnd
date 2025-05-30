@@ -3,8 +3,8 @@
     myInt = 42;
     dec myDecimal;
     int secondInt;
-    secondInt = myInt;
-    myDecimal = 3.14;
+    secondInt = myInt + 1;
+    myDecimal = 3.14 + 3.5;
     str myString;
-    myString = "Marvin";
+    myString = "Marvin" + " is a nice " + "Roboter";
 }
