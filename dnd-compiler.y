@@ -90,6 +90,7 @@ block : '{' { enter_scope(); } stmt_list '}' { exit_scope(); }
       ;
 stmt_list : statement
           | stmt_list statement
+          | block
           ;
 statement : declaration '\n'
           | assignment '\n'
