@@ -1,5 +1,8 @@
 {
-    int myInt = 0;
-    str myString = "Test";
-    dec myDecimal = 1.4;
+    int myInt;
+    myInt = 3;
+    dec myDecimal;
+    myDecimal = 1.56;
+    str myString;
+    myString = "Test";
 }

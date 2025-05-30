@@ -118,6 +118,7 @@ declaration : T_INT ID {
             }
             ;
 assignment : ID '=' expression {
+                printf("Assigning %s\n",$1);
                 symbol_t *symbol = lookup_in_scope($1, current_scope);
                 if (symbol != NULL) {
                     assign_symbol(symbol, $3);
@@ -127,8 +128,8 @@ assignment : ID '=' expression {
            }
            ;
 expression : L_INT      { $$.type = T_INT; $$.value.ival = $1; }
-           | L_DECIMAL  { $$.type = T_DECIMAL; $$.value.ival = $1; }
-           | L_STRING   { $$.type = T_STRING; $$.value.ival = $1; }
+           | L_DECIMAL  { $$.type = T_DECIMAL; $$.value.dval = $1; }
+           | L_STRING   { $$.type = T_STRING; $$.value.sval = $1; }
            | ID         {
                 symbol_t *symbol = lookup_in_scope($1, current_scope);
                 if (symbol != NULL) {

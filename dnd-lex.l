@@ -2,6 +2,8 @@
 %{
 #include "dnd-compiler.tab.h"
 #include <stdlib.h>
+
+int line_number = 1;
 %}
 
 
@@ -20,11 +22,14 @@ ID          {LETTER}{ALPHANUM}*
 
     /* Keywords */
 "int"       { return T_INT; }
-"str"       { return T_STRING; }
 "dec"       { return T_DECIMAL; }
+"str"       { return T_STRING; }
 
 [ ]     { /* skip blanks */ }
-\n      { /* skip newlines */ }
+\n      {
+    /* skip newlines */
+    line_number++;
+}
 \t      { /* skip tabs */ }
 
     /*[iI][fF] {
@@ -32,7 +37,7 @@ ID          {LETTER}{ALPHANUM}*
     }*/
 
 {INTEGER}   {
-    yylval.ivalue = atof(yytext);
+    yylval.ivalue = atoi(yytext);
     return L_INT;
 }
 
@@ -41,7 +46,7 @@ ID          {LETTER}{ALPHANUM}*
     return L_DECIMAL;
 }
 
-[\"{STRING}\"][\'{STRING}\']    {
+\"{STRING}\"    {
     yylval.svalue = yytext;
     return L_STRING;
 }
@@ -55,14 +60,24 @@ ID          {LETTER}{ALPHANUM}*
 "-"     { return '-'; }
 "*"     { return '*'; }
 "/"     { return '/'; }
-";"     { return ';'; }
 "{"     { return '{'; }
 "}"     { return '}'; }
 "("     { return '('; }
 ")"     { return ')'; }
 "="     { return '='; }
-"\""      { return '"'; }
+    /*"\""    { return '"'; }*/
+";"     { return ';'; }
 
+    /* Catch-all for unrecognized characters */
+.               {
+    printf("ERROR: Unrecognized character '%c' at line %d\n",
+           yytext[0], line_number);
+    return yytext[0];
+}
 
 %%
 
+/* Additional C code */
+void init_lexer() {
+    line_number = 1;
+}
