@@ -1,4 +1,4 @@
 all:
 	flex -l dnd-lex.l;
-	yacc -vd dnd-compiler.y;
-	gcc y.tab.c -ly -ll -o dnd-compiler.o
+	bison -vd dnd-compiler.y;
+	gcc dnd-compiler.tab.c -ly -ll -o dnd-compiler.o

@@ -1,6 +1,6 @@
 %option noyywrap
 %{
-#include "y.tab.h"
+#include "dnd-compiler.tab.h"
 #include <stdlib.h>
 %}
 

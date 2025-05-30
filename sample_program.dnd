@@ -1,0 +1,5 @@
+{
+    int x = 0
+    str s = "Test"
+    dec d = 1.4
+}
