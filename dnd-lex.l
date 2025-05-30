@@ -13,7 +13,6 @@ INTEGER     {DIGIT}+
 REAL        {INTEGER}(\.{DIGIT}+)?
 LETTER      [a-zA-Z_]
 ALPHANUM    [a-zA-Z0-9_]
-STRING      [{ALPHANUM} _,.!?]*
 ID          {LETTER}{ALPHANUM}*
 
 
@@ -25,12 +24,9 @@ ID          {LETTER}{ALPHANUM}*
 "dec"       { return T_DECIMAL; }
 "str"       { return T_STRING; }
 
-[ ]     { /* skip blanks */ }
-\n      {
-    /* skip newlines */
-    line_number++;
-}
-\t      { /* skip tabs */ }
+[ ]         { /* skip blanks */ }
+\n          { /* skip newlines */ line_number++; }
+\t          { /* skip tabs */ }
 
     /*[iI][fF] {
     return IF;
@@ -41,21 +37,22 @@ ID          {LETTER}{ALPHANUM}*
     return L_INT;
 }
 
-{REAL}   {
+{REAL}      {
     yylval.dvalue = atof(yytext);
     return L_DECIMAL;
 }
 
-\"{STRING}\"    {
-    yylval.svalue = strdup(yytext);
+\"[^\"]*\"  {
+    yylval.svalue = strdup(yytext); // duplicate string, since yytext is overwritten constantly
     return L_STRING;
 }
 
-{ID}    {
-    yylval.svalue = strdup(yytext);
+{ID}        {
+    yylval.svalue = strdup(yytext); // duplicate string, since yytext is overwritten constantly
     return ID;
 }
 
+    /* Operators, Scopes and Delimiters */
 "+"     { return '+'; }
 "-"     { return '-'; }
 "*"     { return '*'; }

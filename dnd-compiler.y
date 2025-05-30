@@ -117,12 +117,14 @@ declaration : T_INT ID {
                 } else {
                     insert_symbol($2, TYPE_STRING, current_scope);
                     $$ = lookup_in_scope($2, current_scope);
+                    printf("decl complete\n");
                 }
             }
             ;
 assignment : ID '=' expression {
-                printf("Assigning %s\n",$1);
+                printf("assingment %s\n", $1);
                 symbol_t *symbol = lookup_in_scope($1, current_scope);
+                printf("found: %s\n", symbol->name);
                 if (symbol != NULL) {
                     assign_symbol(symbol, $3);
                 } else {
@@ -132,7 +134,10 @@ assignment : ID '=' expression {
            ;
 expression : L_INT      { $$.type = TYPE_INTEGER; $$.value.ival = $1; }
            | L_DECIMAL  { $$.type = TYPE_DECIMAL; $$.value.dval = $1; }
-           | L_STRING   { $$.type = TYPE_STRING; $$.value.sval = $1; }
+           | L_STRING   { 
+            printf("eval string lit\n");
+            $$.type = TYPE_STRING; $$.value.sval = $1; 
+            }
            | ID         {
                 symbol_t *symbol = lookup_in_scope($1, current_scope);
                 if (symbol != NULL) {
@@ -210,7 +215,6 @@ symbol_t* lookup_in_scope(char* name, int scope) {
 }
 
 void insert_symbol(char* name, variable_type_t type, int scope) {
-    printf("adding %s (scope %d)\n", name, scope);
     int h = hash(name);
     symbol_t* new_sym = malloc(sizeof(symbol_t));
     new_sym->name = strdup(name);
