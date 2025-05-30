@@ -54,6 +54,12 @@ ID          {LETTER}{ALPHANUM}*
 "*"     { return '*'; }
 "/"     { return '/'; }
 \n      { return '\n'; }
+"{"     { return '{'; }
+"}"     { return '}'; }
+"("     { return '('; }
+")"     { return ')'; }
+"="     { return '='; }
+"\""      { return '"'; }
 
 
 %%
