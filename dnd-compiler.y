@@ -100,6 +100,7 @@ declaration : T_INT ID {
                     yyerror("Variable already declared!");
                 } else {
                     insert_symbol($2, TYPE_INTEGER, current_scope);
+                    $$ = lookup_in_scope($2, current_scope);
                 }
             }
             | T_DECIMAL ID {
@@ -107,6 +108,7 @@ declaration : T_INT ID {
                     yyerror("Variable already declared!");
                 } else {
                     insert_symbol($2, TYPE_DECIMAL, current_scope);
+                    $$ = lookup_in_scope($2, current_scope);
                 }
             }
             | T_STRING ID {
@@ -114,6 +116,7 @@ declaration : T_INT ID {
                     yyerror("Variable already declared!");
                 } else {
                     insert_symbol($2, TYPE_STRING, current_scope);
+                    $$ = lookup_in_scope($2, current_scope);
                 }
             }
             ;
@@ -127,9 +130,9 @@ assignment : ID '=' expression {
                 }
            }
            ;
-expression : L_INT      { $$.type = T_INT; $$.value.ival = $1; }
-           | L_DECIMAL  { $$.type = T_DECIMAL; $$.value.dval = $1; }
-           | L_STRING   { $$.type = T_STRING; $$.value.sval = $1; }
+expression : L_INT      { $$.type = TYPE_INTEGER; $$.value.ival = $1; }
+           | L_DECIMAL  { $$.type = TYPE_DECIMAL; $$.value.dval = $1; }
+           | L_STRING   { $$.type = TYPE_STRING; $$.value.sval = $1; }
            | ID         {
                 symbol_t *symbol = lookup_in_scope($1, current_scope);
                 if (symbol != NULL) {

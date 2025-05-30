@@ -47,12 +47,12 @@ ID          {LETTER}{ALPHANUM}*
 }
 
 \"{STRING}\"    {
-    yylval.svalue = yytext;
+    yylval.svalue = strdup(yytext);
     return L_STRING;
 }
 
 {ID}    {
-    yylval.svalue = yytext;
+    yylval.svalue = strdup(yytext);
     return ID;
 }
 
@@ -65,7 +65,7 @@ ID          {LETTER}{ALPHANUM}*
 "("     { return '('; }
 ")"     { return ')'; }
 "="     { return '='; }
-    /*"\""    { return '"'; }*/
+"\""    { return '"'; }
 ";"     { return ';'; }
 
     /* Catch-all for unrecognized characters */
