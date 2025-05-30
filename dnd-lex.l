@@ -1,54 +1,51 @@
 %option noyywrap
 %{
-#include "dnd-compiler.tab.h"
+#include "y.tab.h"
 #include <stdlib.h>
 %}
 
 
 /* Building Blocks */
 DIGIT       [0-9]
-NUM         {DIGIT}+(\.{DIGIT}+)?
+INTEGER     {DIGIT}+
+REAL        {INTEGER}(\.{DIGIT}+)?
 LETTER      [a-zA-Z_]
 ALPHANUM    [a-zA-Z0-9_]
+STRING      [{ALPHANUM} _,.!?]*
 ID          {LETTER}{ALPHANUM}*
 
 
 %%
 
 
-/* Keywords */
-"int"       { return SET_INT; }
-"string"    { return SET_STRING; }
-"decimal"   { return SET_DECIMAL; }
-
-/* Dice notation */
-{DIGIT}+[dD]{DIGIT}+ {
-    printf("TOKEN: DICE_EXPRESSION (%s)\n", yytext);
-
-    char* d_pos = strchr(yytext, 'd');
-    if (!d_pos) d_pos = strchr(yytext, 'D');
-
-    *d_pos = '\0';  /* Split the string */
-    int num_dice = atoi(yytext);
-    int die_sides = atoi(d_pos + 1);
-
-    yylval.ival = num_dice * 1000 + die_sides;  /* Encode both values */
-    return DICE_TOKEN;
-}
+    /* Keywords */
+"int"       { return T_INT; }
+"str"    { return T_STRING; }
+"dec"   { return T_DECIMAL; }
 
 [ ]     { /* skip blanks */ }
 
-[iI][fF] {
+    /*[iI][fF] {
     return IF;
+    }*/
+
+{INTEGER}   {
+    yylval.ivalue = atof(yytext);
+    return L_INT;
 }
 
-{NUM}   {
-    yylval.value = atof(yytext);
-    return NUM;
+{REAL}   {
+    yylval.dvalue = atof(yytext);
+    return L_DECIMAL;
+}
+
+[\"{STRING}\"][\'{STRING}\']    {
+    yylval.svalue = yytext;
+    return L_STRING;
 }
 
 {ID}    {
-    yylval.lexeme = yytext;
+    yylval.svalue = yytext;
     return ID;
 }
 
