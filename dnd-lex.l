@@ -20,10 +20,12 @@ ID          {LETTER}{ALPHANUM}*
 
     /* Keywords */
 "int"       { return T_INT; }
-"str"    { return T_STRING; }
-"dec"   { return T_DECIMAL; }
+"str"       { return T_STRING; }
+"dec"       { return T_DECIMAL; }
 
 [ ]     { /* skip blanks */ }
+\n      { /* skip newlines */ }
+\t      { /* skip tabs */ }
 
     /*[iI][fF] {
     return IF;
@@ -53,7 +55,7 @@ ID          {LETTER}{ALPHANUM}*
 "-"     { return '-'; }
 "*"     { return '*'; }
 "/"     { return '/'; }
-\n      { return '\n'; }
+";"     { return ';'; }
 "{"     { return '{'; }
 "}"     { return '}'; }
 "("     { return '('; }

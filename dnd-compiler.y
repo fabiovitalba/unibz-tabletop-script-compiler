@@ -92,24 +92,24 @@ stmt_list : statement
           | stmt_list statement
           | block
           ;
-statement : declaration '\n'
-          | assignment '\n'
+statement : declaration ';'
+          | assignment ';'
           ;
-declaration : T_INT ID '\n'  {
+declaration : T_INT ID {
                 if (lookup_in_scope($2, current_scope) != NULL) {
                     yyerror("Variable already declared!");
                 } else {
                     insert_symbol($2, TYPE_INTEGER, current_scope);
                 }
             }
-            | T_DECIMAL ID '\n' {
+            | T_DECIMAL ID {
                 if (lookup_in_scope($2, current_scope) != NULL) {
                     yyerror("Variable already declared!");
                 } else {
                     insert_symbol($2, TYPE_DECIMAL, current_scope);
                 }
             }
-            | T_STRING ID '\n'  {
+            | T_STRING ID {
                 if (lookup_in_scope($2, current_scope) != NULL) {
                     yyerror("Variable already declared!");
                 } else {
@@ -192,6 +192,7 @@ int hash(char* str) {
 }
 
 symbol_t* lookup_in_scope(char* name, int scope) {
+    printf("looking up %s (scope %d)\n", name, scope);
     int h = hash(name);
     symbol_t* sym = symbol_table[h];
 
@@ -205,6 +206,7 @@ symbol_t* lookup_in_scope(char* name, int scope) {
 }
 
 void insert_symbol(char* name, variable_type_t type, int scope) {
+    printf("adding %s (scope %d)\n", name, scope);
     int h = hash(name);
     symbol_t* new_sym = malloc(sizeof(symbol_t));
     new_sym->name = strdup(name);
@@ -215,6 +217,7 @@ void insert_symbol(char* name, variable_type_t type, int scope) {
 }
 
 void assign_symbol(symbol_t *sym, runtime_value_t val) {
+    printf("assign %s\n", sym->name);
     if (sym->type != val.type) {
         yyerror("Type mismatch.");
         return;
