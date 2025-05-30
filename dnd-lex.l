@@ -4,6 +4,8 @@
 #include <stdlib.h>
 %}
 
+
+/* Building Blocks */
 DIGIT       [0-9]
 NUM         {DIGIT}+(\.{DIGIT}+)?
 LETTER      [a-zA-Z_]
@@ -13,6 +15,11 @@ ID          {LETTER}{ALPHANUM}*
 
 %%
 
+
+/* Keywords */
+"int"       { return SET_INT; }
+"string"    { return SET_STRING; }
+"decimal"   { return SET_DECIMAL; }
 
 /* Dice notation */
 {DIGIT}+[dD]{DIGIT}+ {

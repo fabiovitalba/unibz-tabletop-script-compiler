@@ -35,15 +35,19 @@ int yylex(void);
 
 
 %union {
-       char* lexeme;			//identifier
-       double dvalue;			//value of type double
-       }
+       char* svalue;			// value of type string
+       double dvalue;			// value of type double
+       int ivalue;              // value of type int
+}
 
 %token <dvalue>  NUM
 %token IF
-%token <lexeme> ID
+%token <svalue> ID
 %token UNARY_MINUS
 %token DICE_TOKEN
+%token <ivalue> SET_INT
+%token <svalue> SET_STRING
+%token <dvalue> SET_DECIMAL
 
 %type <dvalue> expr
 %type <dvalue> line
@@ -65,7 +69,7 @@ expr  : expr '+' expr  {$$ = $1 + $3;}
       | expr '/' expr  {$$ = $1 / $3;}
       | NUM            {$$ = $1;}
       | '-' expr       {$$ = -$2;}
-      | ID             {$$=0; printf("IDENTIFICATORE = %s\n",$1);}
+      | ID             {$$=0; printf("IDENTIFIER = %s\n",$1);}
       ;
 
 
