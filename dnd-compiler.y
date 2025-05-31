@@ -59,6 +59,7 @@ runtime_value_t add_expressions(runtime_value_t val1, runtime_value_t val2);
 runtime_value_t subtract_expressions(runtime_value_t val1, runtime_value_t val2);
 runtime_value_t multiply_expressions(runtime_value_t val1, runtime_value_t val2);
 runtime_value_t divide_expressions(runtime_value_t val1, runtime_value_t val2);
+runtime_value_t negate_expression(runtime_value_t val);
 int yylex(void);
 
 
@@ -138,7 +139,7 @@ expression : L_INT      { $$.type = TYPE_INTEGER; $$.value.ival = $1; }
            | expression '-' expression  { $$ = subtract_expressions($1,$3); }
            | expression '*' expression  { $$ = multiply_expressions($1,$3); }
            | expression '/' expression  { $$ = divide_expressions($1,$3); }
-           //| '-' expression             { $$ = -$2; }
+           | '-' expression             { $$ = negate_expression($2); }
            ;
 
 %%
@@ -201,7 +202,7 @@ symbol_t* declare_new_symbol(char* name, variable_type_t type, int scope) {
 }
 
 symbol_t* lookup_in_scope(char* name, int scope) {
-    printf("looking up %s (scope %d)\n", name, scope);
+    //printf("looking up %s (scope %d)\n", name, scope);
     int h = hash(name);
     symbol_t* sym = symbol_table[h];
 
@@ -355,6 +356,27 @@ runtime_value_t divide_expressions(runtime_value_t val1, runtime_value_t val2) {
         }
         default:
             yyerror("Unsupported type for division");
+            result.type = TYPE_INTEGER;
+            result.value.ival = 0;
+    }
+
+    return result;
+}
+
+runtime_value_t negate_expression(runtime_value_t val) {
+    runtime_value_t result;
+    result.type = val.type;
+    switch(val.type) {
+        case TYPE_INTEGER: {
+            result.value.ival = -val.value.ival;
+            break;
+        }
+        case TYPE_DECIMAL: {
+            result.value.dval = -val.value.dval;
+            break;
+        }
+        default:
+            yyerror("Unsupported type for negation");
             result.type = TYPE_INTEGER;
             result.value.ival = 0;
     }

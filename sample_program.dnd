@@ -17,6 +17,17 @@
     prt("secondInt (45): ");
     prtln(secondInt);
 
+    // Test negation of decimal type
+    dec negDec;
+    negDec = -20.0;
+    prt("negDec (-20) = ");
+    prtln(negDec);
+    negDec = negDec + 40.0;
+    negDec = negDec * -2.0;
+    negDec = -negDec;
+    prt("negDec (40) = ");
+    prtln(negDec);
+
     // Test decimal type with indirect assignment and simple operations
     dec secondDec;
     secondDec = myDecimal - 2.0 / 3.0;
