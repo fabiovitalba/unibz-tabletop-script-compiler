@@ -45,6 +45,7 @@ void yyerror(const char *s)
 void enter_scope();
 void exit_scope();
 int hash(char* str);
+symbol_t* declare_new_symbol(char* name, variable_type_t type, int scope);
 symbol_t* lookup_in_scope(char* name, int scope);
 void insert_symbol(char* name, variable_type_t type, int scope);
 void test_match_types(runtime_value_t val1, runtime_value_t val2);
@@ -103,30 +104,9 @@ statement : declaration ';'
           | assignment ';'
           | function_exec ';'
           ;
-declaration : T_INT ID {
-                if (lookup_in_scope($2,current_scope) != NULL) {
-                    yyerror("Variable already declared!");
-                } else {
-                    insert_symbol($2,TYPE_INTEGER,current_scope);
-                    $$ = lookup_in_scope($2,current_scope);
-                }
-            }
-            | T_DECIMAL ID {
-                if (lookup_in_scope($2,current_scope) != NULL) {
-                    yyerror("Variable already declared!");
-                } else {
-                    insert_symbol($2,TYPE_DECIMAL,current_scope);
-                    $$ = lookup_in_scope($2,current_scope);
-                }
-            }
-            | T_STRING ID {
-                if (lookup_in_scope($2,current_scope) != NULL) {
-                    yyerror("Variable already declared!");
-                } else {
-                    insert_symbol($2,TYPE_STRING, current_scope);
-                    $$ = lookup_in_scope($2,current_scope);
-                }
-            }
+declaration : T_INT ID { $$ = declare_new_symbol($2,TYPE_INTEGER,current_scope); }
+            | T_DECIMAL ID { $$ = declare_new_symbol($2,TYPE_DECIMAL,current_scope); }
+            | T_STRING ID { $$ = declare_new_symbol($2,TYPE_STRING,current_scope); }
             ;
 assignment : ID '=' expression {
                 symbol_t *symbol = lookup_in_scope($1,current_scope);
@@ -199,6 +179,16 @@ int hash(char* str) {
         hash = hash * 31 + *str++;
     }
     return hash % HASH_SIZE;
+}
+
+symbol_t* declare_new_symbol(char* name, variable_type_t type, int scope) {
+    if (lookup_in_scope(name,scope) != NULL) {
+        yyerror("Variable already declared!");
+        return NULL;
+    } else {
+        insert_symbol(name,type,scope);
+        return lookup_in_scope(name,scope);
+    }
 }
 
 symbol_t* lookup_in_scope(char* name, int scope) {
