@@ -100,7 +100,7 @@ program : block
 block : '{' { enter_scope(); } stmt_list '}' { exit_scope(); }
       ;
 stmt_list : statement
-          | stmt_list statement
+          | statement stmt_list
           | block
           ;
 statement : declaration ';'

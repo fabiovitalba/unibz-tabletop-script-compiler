@@ -29,7 +29,7 @@ ID          {LETTER}{ALPHANUM}*
 [ ]         { /* skip blanks */ }
 \n          { /* skip newlines */ line_number++; }
 \t          { /* skip tabs */ }
-"//".*\n    { /* skip comments */ }
+"//".*\n    { /* skip comment lines */ }
 
     /*[iI][fF] {
     return IF;
