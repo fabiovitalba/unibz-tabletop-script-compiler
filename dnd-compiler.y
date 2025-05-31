@@ -25,7 +25,6 @@ typedef struct {
 // Struct that handles symbols of different types
 typedef struct symbol {
     char* name;
-    variable_type_t type;
     int scope_level;
     runtime_value_t value;
     struct symbol* next;
@@ -210,7 +209,7 @@ void insert_symbol(char* name, variable_type_t type, int scope) {
     int h = hash(name);
     symbol_t* new_sym = malloc(sizeof(symbol_t));
     new_sym->name = strdup(name);
-    new_sym->type = type;
+    new_sym->value.type = type;
     new_sym->scope_level = scope;
     new_sym->next = symbol_table[h];
     symbol_table[h] = new_sym;
@@ -218,7 +217,6 @@ void insert_symbol(char* name, variable_type_t type, int scope) {
 
 void test_match_types(runtime_value_t val1, runtime_value_t val2) {
     if (val1.type != val2.type) {
-        printf("type 1 %u, type 2 %u", val1.type, val2.type);
         yyerror("Type mismatch.");
     }
 }
