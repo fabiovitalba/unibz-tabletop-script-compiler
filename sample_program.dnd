@@ -7,4 +7,13 @@
     myDecimal = 3.14 + 3.5;
     str myString;
     myString = "Marvin" + " is a nice " + "Roboter";
+
+    prt("myInt: ");
+    prtln(myInt);
+    prt("myDecimal: ");
+    prtln(myDecimal);
+    prt("secondInt: ");
+    prtln(secondInt);
+    prt("myString: ");
+    prtln(myString);
 }

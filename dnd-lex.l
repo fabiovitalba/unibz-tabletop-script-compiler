@@ -23,6 +23,8 @@ ID          {LETTER}{ALPHANUM}*
 "int"       { return T_INT; }
 "dec"       { return T_DECIMAL; }
 "str"       { return T_STRING; }
+"prt"       { return F_PRINT; }
+"prtln"     { return F_PRINTLN; }
 
 [ ]         { /* skip blanks */ }
 \n          { /* skip newlines */ line_number++; }
@@ -43,7 +45,10 @@ ID          {LETTER}{ALPHANUM}*
 }
 
 \"[^\"]*\"  {
-    yylval.svalue = strdup(yytext); // duplicate string, since yytext is overwritten constantly
+    int len = strlen(yytext) - 2;
+    yylval.svalue = malloc(len + 1);
+    strncpy(yylval.svalue, yytext + 1, len);
+    yylval.svalue[len] = '\0';
     return L_STRING;
 }
 

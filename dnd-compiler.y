@@ -49,6 +49,7 @@ symbol_t* lookup_in_scope(char* name, int scope);
 void insert_symbol(char* name, variable_type_t type, int scope);
 void test_match_types(runtime_value_t val1, runtime_value_t val2);
 void assign_symbol(symbol_t *sym, runtime_value_t val);
+void print_val(runtime_value_t val, int new_line);
 runtime_value_t add_expressions(runtime_value_t val1, runtime_value_t val2);
 int yylex(void);
 
@@ -71,6 +72,8 @@ int yylex(void);
 %token T_INT
 %token T_STRING
 %token T_DECIMAL
+%token F_PRINT
+%token F_PRINTLN
 
 %type <value> expression
 %type <symbol> declaration
@@ -95,6 +98,7 @@ stmt_list : statement
           ;
 statement : declaration ';'
           | assignment ';'
+          | function_exec ';'
           ;
 declaration : T_INT ID {
                 if (lookup_in_scope($2, current_scope) != NULL) {
@@ -131,6 +135,10 @@ assignment : ID '=' expression {
                 }
            }
            ;
+function_exec : ID '(' expression ')' { ; }
+              | F_PRINT '(' expression ')' { print_val($3,0); }
+              | F_PRINTLN '(' expression ')' { print_val($3,1); }
+              ;
 expression : L_INT      { $$.type = TYPE_INTEGER; $$.value.ival = $1; }
            | L_DECIMAL  { $$.type = TYPE_DECIMAL; $$.value.dval = $1; }
            | L_STRING   { $$.type = TYPE_STRING; $$.value.sval = strdup($1); }
@@ -192,7 +200,7 @@ int hash(char* str) {
 }
 
 symbol_t* lookup_in_scope(char* name, int scope) {
-    printf("looking up %s (scope %d)\n", name, scope);
+    //printf("looking up %s (scope %d)\n", name, scope);
     int h = hash(name);
     symbol_t* sym = symbol_table[h];
 
@@ -224,6 +232,28 @@ void test_match_types(runtime_value_t val1, runtime_value_t val2) {
 void assign_symbol(symbol_t *sym, runtime_value_t val) {
     test_match_types(sym->value, val);
     sym->value = val;
+}
+
+void print_val(runtime_value_t val, int new_line) {
+    switch(val.type) {
+        case TYPE_INTEGER: {
+            printf("%d",val.value.ival);
+            break;
+        }
+        case TYPE_DECIMAL: {
+            printf("%f",val.value.dval);
+            break;
+        }
+        case TYPE_STRING: {
+            printf("%s",val.value.sval);
+            break;
+        }
+        default:
+            yyerror("Unsupported type for print.");
+    }
+    if (new_line) {
+        printf("\n");
+    }
 }
 
 runtime_value_t add_expressions(runtime_value_t val1, runtime_value_t val2) {
