@@ -37,12 +37,12 @@ ID          {LETTER}{ALPHANUM}*
 
 {INTEGER}   {
     yylval.ivalue = atoi(yytext);
-    return L_INT;
+    return L_INT_TOK;
 }
 
 {REAL}      {
     yylval.dvalue = atof(yytext);
-    return L_DECIMAL;
+    return L_DEC_TOK;
 }
 
 \"[^\"]*\"  {
@@ -50,7 +50,7 @@ ID          {LETTER}{ALPHANUM}*
     yylval.svalue = malloc(len + 1);
     strncpy(yylval.svalue, yytext + 1, len);
     yylval.svalue[len] = '\0';
-    return L_STRING;
+    return L_STR_TOK;
 }
 
 {ID}        {

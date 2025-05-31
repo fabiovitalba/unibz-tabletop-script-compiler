@@ -80,9 +80,9 @@ int yylex(void);
     runtime_value_t value;
 }
 
-%token <ivalue> L_INT
-%token <dvalue> L_DECIMAL
-%token <svalue> L_STRING
+%token <ivalue> L_INT_TOK
+%token <dvalue> L_DEC_TOK
+%token <svalue> L_STR_TOK
 %token <svalue> ID
 %token T_INT_TOK
 %token T_STR_TOK
@@ -131,9 +131,9 @@ function_exec : ID '(' expression ')'           { ; }
               | F_PRINT '(' expression ')'      { print_val($3,0); }
               | F_PRINTLN '(' expression ')'    { print_val($3,1); }
               ;
-expression : L_INT      { $$.type = TYPE_INTEGER; $$.value.ival = $1; }
-           | L_DECIMAL  { $$.type = TYPE_DECIMAL; $$.value.dval = $1; }
-           | L_STRING   { $$.type = TYPE_STRING; $$.value.sval = strdup($1); }
+expression : L_INT_TOK      { $$.type = TYPE_INTEGER; $$.value.ival = $1; }
+           | L_DEC_TOK  { $$.type = TYPE_DECIMAL; $$.value.dval = $1; }
+           | L_STR_TOK   { $$.type = TYPE_STRING; $$.value.sval = strdup($1); }
            | ID         {
                 symbol_t *symbol = lookup_in_scope($1,current_scope);
                 if (symbol != NULL) {
