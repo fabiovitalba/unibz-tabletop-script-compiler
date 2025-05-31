@@ -96,8 +96,6 @@ int yylex(void);
 
 program : block
         ;
-//function_def : type ID '(' params ')' { enter_scope(); } block { exit_scope(); }
-//             ;
 block : '{' { enter_scope(); } stmt_list '}' { exit_scope(); }
       ;
 stmt_list : statement
@@ -108,9 +106,9 @@ statement : declaration ';'
           | assignment ';'
           | function_exec ';'
           ;
-declaration : T_INT ID { $$ = declare_new_symbol($2,TYPE_INTEGER,current_scope); }
-            | T_DECIMAL ID { $$ = declare_new_symbol($2,TYPE_DECIMAL,current_scope); }
-            | T_STRING ID { $$ = declare_new_symbol($2,TYPE_STRING,current_scope); }
+declaration : T_INT ID      { $$ = declare_new_symbol($2,TYPE_INTEGER,current_scope); }
+            | T_DECIMAL ID  { $$ = declare_new_symbol($2,TYPE_DECIMAL,current_scope); }
+            | T_STRING ID   { $$ = declare_new_symbol($2,TYPE_STRING,current_scope); }
             ;
 assignment : ID '=' expression {
                 symbol_t *symbol = lookup_in_scope($1,current_scope);
@@ -121,9 +119,9 @@ assignment : ID '=' expression {
                 }
            }
            ;
-function_exec : ID '(' expression ')' { ; }
-              | F_PRINT '(' expression ')' { print_val($3,0); }
-              | F_PRINTLN '(' expression ')' { print_val($3,1); }
+function_exec : ID '(' expression ')'           { ; }
+              | F_PRINT '(' expression ')'      { print_val($3,0); }
+              | F_PRINTLN '(' expression ')'    { print_val($3,1); }
               ;
 expression : L_INT      { $$.type = TYPE_INTEGER; $$.value.ival = $1; }
            | L_DECIMAL  { $$.type = TYPE_DECIMAL; $$.value.dval = $1; }
@@ -203,7 +201,7 @@ symbol_t* declare_new_symbol(char* name, variable_type_t type, int scope) {
 }
 
 symbol_t* lookup_in_scope(char* name, int scope) {
-    //printf("looking up %s (scope %d)\n", name, scope);
+    printf("looking up %s (scope %d)\n", name, scope);
     int h = hash(name);
     symbol_t* sym = symbol_table[h];
 

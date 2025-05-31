@@ -44,4 +44,20 @@
     str undefString;
     prt("undefString = ");
     prtln(undefString);
+
+    // Test nested scope
+    {
+        int nestedInt;
+        nestedInt = 5;
+        prt("nestedInt (5) = ");
+        prtln(nestedInt);
+
+        // Another nested scope
+        {
+            dec nestedDec;
+            nestedDec = 4.20;
+            prt("nestedDec (4.200000) = ");
+            prtln(nestedDec);
+        }
+    }
 }
