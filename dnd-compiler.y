@@ -51,6 +51,9 @@ void test_match_types(runtime_value_t val1, runtime_value_t val2);
 void assign_symbol(symbol_t *sym, runtime_value_t val);
 void print_val(runtime_value_t val, int new_line);
 runtime_value_t add_expressions(runtime_value_t val1, runtime_value_t val2);
+runtime_value_t subtract_expressions(runtime_value_t val1, runtime_value_t val2);
+runtime_value_t multiply_expressions(runtime_value_t val1, runtime_value_t val2);
+runtime_value_t divide_expressions(runtime_value_t val1, runtime_value_t val2);
 int yylex(void);
 
 
@@ -101,35 +104,34 @@ statement : declaration ';'
           | function_exec ';'
           ;
 declaration : T_INT ID {
-                if (lookup_in_scope($2, current_scope) != NULL) {
+                if (lookup_in_scope($2,current_scope) != NULL) {
                     yyerror("Variable already declared!");
                 } else {
-                    insert_symbol($2, TYPE_INTEGER, current_scope);
-                    $$ = lookup_in_scope($2, current_scope);
+                    insert_symbol($2,TYPE_INTEGER,current_scope);
+                    $$ = lookup_in_scope($2,current_scope);
                 }
             }
             | T_DECIMAL ID {
-                if (lookup_in_scope($2, current_scope) != NULL) {
+                if (lookup_in_scope($2,current_scope) != NULL) {
                     yyerror("Variable already declared!");
                 } else {
-                    insert_symbol($2, TYPE_DECIMAL, current_scope);
-                    $$ = lookup_in_scope($2, current_scope);
+                    insert_symbol($2,TYPE_DECIMAL,current_scope);
+                    $$ = lookup_in_scope($2,current_scope);
                 }
             }
             | T_STRING ID {
-                if (lookup_in_scope($2, current_scope) != NULL) {
+                if (lookup_in_scope($2,current_scope) != NULL) {
                     yyerror("Variable already declared!");
                 } else {
-                    insert_symbol($2, TYPE_STRING, current_scope);
-                    $$ = lookup_in_scope($2, current_scope);
+                    insert_symbol($2,TYPE_STRING, current_scope);
+                    $$ = lookup_in_scope($2,current_scope);
                 }
             }
             ;
 assignment : ID '=' expression {
-                printf("assingment %s\n", $1);
-                symbol_t *symbol = lookup_in_scope($1, current_scope);
+                symbol_t *symbol = lookup_in_scope($1,current_scope);
                 if (symbol != NULL) {
-                    assign_symbol(symbol, $3);
+                    assign_symbol(symbol,$3);
                 } else {
                     yyerror("Undeclared variable");
                 }
@@ -143,17 +145,17 @@ expression : L_INT      { $$.type = TYPE_INTEGER; $$.value.ival = $1; }
            | L_DECIMAL  { $$.type = TYPE_DECIMAL; $$.value.dval = $1; }
            | L_STRING   { $$.type = TYPE_STRING; $$.value.sval = strdup($1); }
            | ID         {
-                symbol_t *symbol = lookup_in_scope($1, current_scope);
+                symbol_t *symbol = lookup_in_scope($1,current_scope);
                 if (symbol != NULL) {
                     $$ = symbol->value;
                 } else {
                     yyerror("Undeclared variable");
                 }
            }
-           | expression '+' expression  { $$ = add_expressions($1, $3); }
-           //| expression '-' expression  { $$ = $1 - $3; }
-           //| expression '*' expression  { $$ = $1 * $3; }
-           //| expression '/' expression  { $$ = $1 / $3; }
+           | expression '+' expression  { $$ = add_expressions($1,$3); }
+           | expression '-' expression  { $$ = subtract_expressions($1,$3); }
+           | expression '*' expression  { $$ = multiply_expressions($1,$3); }
+           | expression '/' expression  { $$ = divide_expressions($1,$3); }
            //| '-' expression             { $$ = -$2; }
            ;
 
@@ -288,6 +290,72 @@ runtime_value_t add_expressions(runtime_value_t val1, runtime_value_t val2) {
         }
         default:
             yyerror("Unsupported type for addition");
+            result.type = TYPE_INTEGER;
+            result.value.ival = 0;
+    }
+
+    return result;
+}
+
+runtime_value_t subtract_expressions(runtime_value_t val1, runtime_value_t val2) {
+    test_match_types(val1, val2);
+    runtime_value_t result;
+    result.type = val1.type;
+    switch(val1.type) {
+        case TYPE_INTEGER: {
+            result.value.ival = val1.value.ival - val2.value.ival;
+            break;
+        }
+        case TYPE_DECIMAL: {
+            result.value.dval = val1.value.dval - val2.value.dval;
+            break;
+        }
+        default:
+            yyerror("Unsupported type for subtraction");
+            result.type = TYPE_INTEGER;
+            result.value.ival = 0;
+    }
+
+    return result;
+}
+
+runtime_value_t multiply_expressions(runtime_value_t val1, runtime_value_t val2) {
+    test_match_types(val1, val2);
+    runtime_value_t result;
+    result.type = val1.type;
+    switch(val1.type) {
+        case TYPE_INTEGER: {
+            result.value.ival = val1.value.ival * val2.value.ival;
+            break;
+        }
+        case TYPE_DECIMAL: {
+            result.value.dval = val1.value.dval * val2.value.dval;
+            break;
+        }
+        default:
+            yyerror("Unsupported type for multiplication");
+            result.type = TYPE_INTEGER;
+            result.value.ival = 0;
+    }
+
+    return result;
+}
+
+runtime_value_t divide_expressions(runtime_value_t val1, runtime_value_t val2) {
+    test_match_types(val1, val2);
+    runtime_value_t result;
+    result.type = val1.type;
+    switch(val1.type) {
+        case TYPE_INTEGER: {
+            result.value.ival = val1.value.ival / val2.value.ival;
+            break;
+        }
+        case TYPE_DECIMAL: {
+            result.value.dval = val1.value.dval / val2.value.dval;
+            break;
+        }
+        default:
+            yyerror("Unsupported type for division");
             result.type = TYPE_INTEGER;
             result.value.ival = 0;
     }

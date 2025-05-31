@@ -3,17 +3,21 @@
     myInt = 42;
     dec myDecimal;
     int secondInt;
-    secondInt = myInt + 1;
+    secondInt = myInt + 1 * 3;
     myDecimal = 3.14 + 3.5;
+    dec secondDec;
+    secondDec = myDecimal - 2.0 / 3.0;
     str myString;
     myString = "Marvin" + " is a nice " + "Roboter";
 
-    prt("myInt: ");
+    prt("myInt (42): ");
     prtln(myInt);
-    prt("myDecimal: ");
+    prt("myDecimal (6.640000): ");
     prtln(myDecimal);
-    prt("secondInt: ");
+    prt("secondInt (45): ");
     prtln(secondInt);
+    prt("secondDec (5.973333): ");
+    prtln(secondDec);
     prt("myString: ");
     prtln(myString);
 }
