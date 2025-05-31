@@ -84,9 +84,9 @@ int yylex(void);
 %token <dvalue> L_DECIMAL
 %token <svalue> L_STRING
 %token <svalue> ID
-%token T_INT
-%token T_STRING
-%token T_DECIMAL
+%token T_INT_TOK
+%token T_STR_TOK
+%token T_DEC_TOK
 %token F_PRINT
 %token F_PRINTLN
 
@@ -114,9 +114,9 @@ statement : declaration ';'
           | assignment ';'
           | function_exec ';'
           ;
-declaration : T_INT ID      { $$ = declare_new_symbol($2,TYPE_INTEGER,current_scope); }
-            | T_DECIMAL ID  { $$ = declare_new_symbol($2,TYPE_DECIMAL,current_scope); }
-            | T_STRING ID   { $$ = declare_new_symbol($2,TYPE_STRING,current_scope); }
+declaration : T_INT_TOK ID      { $$ = declare_new_symbol($2,TYPE_INTEGER,current_scope); }
+            | T_DEC_TOK ID  { $$ = declare_new_symbol($2,TYPE_DECIMAL,current_scope); }
+            | T_STR_TOK ID   { $$ = declare_new_symbol($2,TYPE_STRING,current_scope); }
             ;
 assignment : ID '=' expression {
                 symbol_t *symbol = lookup_in_scope($1,current_scope);
@@ -403,7 +403,8 @@ runtime_value_t convert_to_type(runtime_value_t val, variable_type_t new_type) {
 
     runtime_value_t result;
     result.type = new_type;
-    switch(true) {
+    /*
+    switch(0) {
         case (val.type == TYPE_INTEGER) && (new_type == TYPE_DECIMAL): {
             result.value.dval = (double) val.value.ival;
             break;
@@ -419,6 +420,7 @@ runtime_value_t convert_to_type(runtime_value_t val, variable_type_t new_type) {
             break;
         }
     }
+    */
     return result;
 }
 

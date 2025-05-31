@@ -20,9 +20,9 @@ ID          {LETTER}{ALPHANUM}*
 
 
     /* Keywords */
-"int"       { return T_INT; }
-"dec"       { return T_DECIMAL; }
-"str"       { return T_STRING; }
+"int"       { return T_INT_TOK; }
+"dec"       { return T_DEC_TOK; }
+"str"       { return T_STR_TOK; }
 "prt"       { return F_PRINT; }
 "prtln"     { return F_PRINTLN; }
 
