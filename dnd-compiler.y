@@ -30,6 +30,10 @@ typedef struct symbol {
     struct symbol* next;
 } symbol_t;
 
+/*
+The symbol_table is an array of HASH_SIZE linked lists containing symbol_t elements.
+We use size 101 because it's a prime and allows for even distribution in the hash table.
+*/
 #define HASH_SIZE 101
 symbol_t* symbol_table[HASH_SIZE];
 int current_scope = 0;
@@ -173,6 +177,13 @@ void exit_scope() {
     current_scope--;
 }
 
+/**
+* This hash function takes the name of a symbol and returns an ID to be used
+* within the symbol table array. This distributes the symbols evenly within
+* the hash table.
+* We multiply by 31 (prime number) in order to have a better distribution of
+* values within the hash table.
+*/
 int hash(char* str) {
     unsigned int hash = 0;
     while (*str) {
