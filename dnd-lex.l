@@ -58,20 +58,20 @@ ID          {LETTER}{ALPHANUM}*
 }
 
     /* Operators, Scopes and Delimiters */
-"+"     { return '+'; }
-"-"     { return '-'; }
-"*"     { return '*'; }
-"/"     { return '/'; }
-"{"     { return '{'; }
-"}"     { return '}'; }
-"("     { return '('; }
-")"     { return ')'; }
-"="     { return '='; }
-"\""    { return '"'; }
-";"     { return ';'; }
+"+"         { return '+'; }
+"-"         { return '-'; }
+"*"         { return '*'; }
+"/"         { return '/'; }
+"{"         { return '{'; }
+"}"         { return '}'; }
+"("         { return '('; }
+")"         { return ')'; }
+"="         { return '='; }
+"\""        { return '"'; }
+";"         { return ';'; }
 
     /* Catch-all for unrecognized characters */
-.               {
+.           {
     printf("ERROR: Unrecognized character '%c' at line %d\n",
            yytext[0], line_number);
     return yytext[0];
