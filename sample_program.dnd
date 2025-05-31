@@ -1,4 +1,11 @@
 {
+    {
+        int nestedInt;
+        nestedInt = 20;
+        prt("nestedInt (20) = ");
+        prtln(nestedInt);
+    }
+
     // Test integer type with indirect value assignment
     int myInt;
     myInt = 42;
@@ -70,5 +77,10 @@
             prt("nestedDec (4.200000) = ");
             prtln(nestedDec);
         }
+
+        dec nestedDec;
+        nestedDec = 6.66;
+        prt("nestedDec (6.660000) = ");
+        prtln(nestedDec);
     }
 }

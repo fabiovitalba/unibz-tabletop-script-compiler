@@ -102,6 +102,7 @@ block : '{' { enter_scope(); } stmt_list '}' { exit_scope(); }
 stmt_list : statement
           | statement stmt_list
           | block
+          | block stmt_list
           ;
 statement : declaration ';'
           | assignment ';'
