@@ -12,6 +12,13 @@ typedef enum {
     TYPE_DECIMAL
 } variable_type_t;
 
+typedef enum {
+    OP_ADDITION,
+    OP_SUBTRACTION,
+    OP_MULTIPLICATION,
+    OP_DIVISION
+} math_op_t;
+
 // Struct that handles variables of different types
 typedef struct {
     variable_type_t type;
@@ -52,13 +59,11 @@ int hash(char* str);
 symbol_t* declare_new_symbol(char* name, variable_type_t type, int scope);
 symbol_t* lookup_in_scope(char* name, int scope);
 void insert_symbol(char* name, variable_type_t type, int scope);
-void test_match_types(runtime_value_t val1, runtime_value_t val2);
+void verify_types_match(runtime_value_t val1, runtime_value_t val2);
 void assign_symbol(symbol_t *sym, runtime_value_t val);
 void print_val(runtime_value_t val, int new_line);
 runtime_value_t add_expressions(runtime_value_t val1, runtime_value_t val2);
-runtime_value_t subtract_expressions(runtime_value_t val1, runtime_value_t val2);
-runtime_value_t multiply_expressions(runtime_value_t val1, runtime_value_t val2);
-runtime_value_t divide_expressions(runtime_value_t val1, runtime_value_t val2);
+runtime_value_t mathematical_operation(runtime_value_t val1, runtime_value_t val2, math_op_t op);
 runtime_value_t negate_expression(runtime_value_t val);
 int yylex(void);
 
@@ -137,9 +142,9 @@ expression : L_INT      { $$.type = TYPE_INTEGER; $$.value.ival = $1; }
                 }
            }
            | expression '+' expression  { $$ = add_expressions($1,$3); }
-           | expression '-' expression  { $$ = subtract_expressions($1,$3); }
-           | expression '*' expression  { $$ = multiply_expressions($1,$3); }
-           | expression '/' expression  { $$ = divide_expressions($1,$3); }
+           | expression '-' expression  { $$ = mathematical_operation($1,$3,OP_SUBTRACTION); }
+           | expression '*' expression  { $$ = mathematical_operation($1,$3,OP_MULTIPLICATION); }
+           | expression '/' expression  { $$ = mathematical_operation($1,$3,OP_DIVISION); }
            | '-' expression             { $$ = negate_expression($2); }
            ;
 
@@ -226,14 +231,17 @@ void insert_symbol(char* name, variable_type_t type, int scope) {
     symbol_table[h] = new_sym;
 }
 
-void test_match_types(runtime_value_t val1, runtime_value_t val2) {
+void verify_types_match(runtime_value_t val1, runtime_value_t val2) {
     if (val1.type != val2.type) {
+        if (((val1.type == TYPE_INTEGER) && (val2.type == TYPE_DECIMAL)) || ((val1.type == TYPE_DECIMAL) && (val2.type == TYPE_INTEGER)))
+            return; // types can be matched
+
         yyerror("Type mismatch.");
     }
 }
 
 void assign_symbol(symbol_t *sym, runtime_value_t val) {
-    test_match_types(sym->value, val);
+    verify_types_match(sym->value, val);
     sym->value = val;
 }
 
@@ -260,19 +268,15 @@ void print_val(runtime_value_t val, int new_line) {
 }
 
 runtime_value_t add_expressions(runtime_value_t val1, runtime_value_t val2) {
-    test_match_types(val1, val2);
+    verify_types_match(val1, val2);
     runtime_value_t result;
-    result.type = val1.type;
     switch(val1.type) {
-        case TYPE_INTEGER: {
-            result.value.ival = val1.value.ival + val2.value.ival;
-            break;
-        }
+        case TYPE_INTEGER:
         case TYPE_DECIMAL: {
-            result.value.dval = val1.value.dval + val2.value.dval;
-            break;
+            return mathematical_operation(val1, val2, OP_ADDITION);
         }
         case TYPE_STRING: {
+            result.type = val1.type;
             int len1 = strlen(val1.value.sval);
             int len2 = strlen(val2.value.sval);
             
@@ -298,72 +302,6 @@ runtime_value_t add_expressions(runtime_value_t val1, runtime_value_t val2) {
     return result;
 }
 
-runtime_value_t subtract_expressions(runtime_value_t val1, runtime_value_t val2) {
-    test_match_types(val1, val2);
-    runtime_value_t result;
-    result.type = val1.type;
-    switch(val1.type) {
-        case TYPE_INTEGER: {
-            result.value.ival = val1.value.ival - val2.value.ival;
-            break;
-        }
-        case TYPE_DECIMAL: {
-            result.value.dval = val1.value.dval - val2.value.dval;
-            break;
-        }
-        default:
-            yyerror("Unsupported type for subtraction");
-            result.type = TYPE_INTEGER;
-            result.value.ival = 0;
-    }
-
-    return result;
-}
-
-runtime_value_t multiply_expressions(runtime_value_t val1, runtime_value_t val2) {
-    test_match_types(val1, val2);
-    runtime_value_t result;
-    result.type = val1.type;
-    switch(val1.type) {
-        case TYPE_INTEGER: {
-            result.value.ival = val1.value.ival * val2.value.ival;
-            break;
-        }
-        case TYPE_DECIMAL: {
-            result.value.dval = val1.value.dval * val2.value.dval;
-            break;
-        }
-        default:
-            yyerror("Unsupported type for multiplication");
-            result.type = TYPE_INTEGER;
-            result.value.ival = 0;
-    }
-
-    return result;
-}
-
-runtime_value_t divide_expressions(runtime_value_t val1, runtime_value_t val2) {
-    test_match_types(val1, val2);
-    runtime_value_t result;
-    result.type = val1.type;
-    switch(val1.type) {
-        case TYPE_INTEGER: {
-            result.value.ival = val1.value.ival / val2.value.ival;
-            break;
-        }
-        case TYPE_DECIMAL: {
-            result.value.dval = val1.value.dval / val2.value.dval;
-            break;
-        }
-        default:
-            yyerror("Unsupported type for division");
-            result.type = TYPE_INTEGER;
-            result.value.ival = 0;
-    }
-
-    return result;
-}
-
 runtime_value_t negate_expression(runtime_value_t val) {
     runtime_value_t result;
     result.type = val.type;
@@ -380,6 +318,79 @@ runtime_value_t negate_expression(runtime_value_t val) {
             yyerror("Unsupported type for negation");
             result.type = TYPE_INTEGER;
             result.value.ival = 0;
+    }
+
+    return result;
+}
+
+/**
+* This method takes two values and executes mathematical operations on them.
+* It automatically converts to "dec" values where necessary.
+*/
+runtime_value_t mathematical_operation(runtime_value_t val1, runtime_value_t val2, math_op_t op) {
+    runtime_value_t result;
+    if ((val1.type == TYPE_STRING) || (val2.type == TYPE_STRING)) {
+        yyerror("str does not support this operation.");
+        result.type = TYPE_INTEGER;
+        result.value.ival = 0;
+    } else {
+        if ((val1.type == val2.type) && (val1.type == TYPE_INTEGER)) {
+            result.type = TYPE_INTEGER;
+            int ival1 = val1.value.ival;
+            int ival2 = val2.value.ival;
+
+            switch(op) {
+                case OP_ADDITION: {
+                    result.value.ival = ival1 + ival2;
+                    break;
+                }
+                case OP_SUBTRACTION: {
+                    result.value.ival = ival1 - ival2;
+                    break;
+                }
+                case OP_MULTIPLICATION: {
+                    result.value.ival = ival1 * ival2;
+                    break;
+                }
+                case OP_DIVISION: {
+                    result.value.ival = ival1 / ival2;
+                    break;
+                }
+            }
+        } else {
+            result.type = TYPE_DECIMAL;
+            double dval1;
+            if (val1.type == TYPE_INTEGER) {
+                dval1 = val1.value.ival;
+            } else {
+                dval1 = val1.value.dval;
+            }
+            double dval2;
+            if (val1.type == TYPE_INTEGER) {
+                dval2 = val2.value.ival;
+            } else {
+                dval2 = val2.value.dval;
+            }
+
+            switch(op) {
+                case OP_ADDITION: {
+                    result.value.ival = dval1 + dval2;
+                    break;
+                }
+                case OP_SUBTRACTION: {
+                    result.value.ival = dval1 - dval2;
+                    break;
+                }
+                case OP_MULTIPLICATION: {
+                    result.value.ival = dval1 * dval2;
+                    break;
+                }
+                case OP_DIVISION: {
+                    result.value.ival = dval1 / dval2;
+                    break;
+                }
+            }
+        }
     }
 
     return result;

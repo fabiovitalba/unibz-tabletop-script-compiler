@@ -40,6 +40,13 @@
     secondDec = myDecimal - 2.0 / 3.0;
     prt("secondDec (5.973333): ");
     prtln(secondDec);
+
+    // Test implicit decimal conversion
+    dec implDec;
+    implDec = 3;
+    implDec = implDec * 3;
+    prt("implDec (9.000000) = ");
+    prtln(implDec);
     
     // Test string type with indirect assignment and concatenation
     str myString;
