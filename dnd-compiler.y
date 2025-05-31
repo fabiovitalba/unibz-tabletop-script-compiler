@@ -65,6 +65,7 @@ void print_val(runtime_value_t val, int new_line);
 runtime_value_t add_expressions(runtime_value_t val1, runtime_value_t val2);
 runtime_value_t mathematical_operation(runtime_value_t val1, runtime_value_t val2, math_op_t op);
 runtime_value_t negate_expression(runtime_value_t val);
+runtime_value_t convert_to_type(runtime_value_t val, variable_type_t new_type);
 int yylex(void);
 
 
@@ -393,6 +394,31 @@ runtime_value_t mathematical_operation(runtime_value_t val1, runtime_value_t val
         }
     }
 
+    return result;
+}
+
+runtime_value_t convert_to_type(runtime_value_t val, variable_type_t new_type) {
+    if (val.type == new_type)
+        return val;
+
+    runtime_value_t result;
+    result.type = new_type;
+    switch(true) {
+        case (val.type == TYPE_INTEGER) && (new_type == TYPE_DECIMAL): {
+            result.value.dval = (double) val.value.ival;
+            break;
+        }
+        case (val.type == TYPE_INTEGER) && (new_type == TYPE_STRING): {
+            break;
+        }
+        case (val.type == TYPE_DECIMAL) && (new_type == TYPE_INTEGER): {
+            result.value.ival = (int) val.value.dval;
+            break;
+        }
+        case (val.type == TYPE_DECIMAL) && (new_type == TYPE_STRING): {
+            break;
+        }
+    }
     return result;
 }
 
