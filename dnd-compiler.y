@@ -115,8 +115,8 @@ statement : declaration ';'
           | function_exec ';'
           ;
 declaration : T_INT_TOK ID      { $$ = declare_new_symbol($2,TYPE_INTEGER,current_scope); }
-            | T_DEC_TOK ID  { $$ = declare_new_symbol($2,TYPE_DECIMAL,current_scope); }
-            | T_STR_TOK ID   { $$ = declare_new_symbol($2,TYPE_STRING,current_scope); }
+            | T_DEC_TOK ID      { $$ = declare_new_symbol($2,TYPE_DECIMAL,current_scope); }
+            | T_STR_TOK ID      { $$ = declare_new_symbol($2,TYPE_STRING,current_scope); }
             ;
 assignment : ID '=' expression {
                 symbol_t *symbol = lookup_in_scope($1,current_scope);
@@ -132,9 +132,9 @@ function_exec : ID '(' expression ')'           { ; }
               | F_PRINTLN '(' expression ')'    { print_val($3,1); }
               ;
 expression : L_INT_TOK      { $$.type = TYPE_INTEGER; $$.value.ival = $1; }
-           | L_DEC_TOK  { $$.type = TYPE_DECIMAL; $$.value.dval = $1; }
-           | L_STR_TOK   { $$.type = TYPE_STRING; $$.value.sval = strdup($1); }
-           | ID         {
+           | L_DEC_TOK      { $$.type = TYPE_DECIMAL; $$.value.dval = $1; }
+           | L_STR_TOK      { $$.type = TYPE_STRING; $$.value.sval = strdup($1); }
+           | ID             {
                 symbol_t *symbol = lookup_in_scope($1,current_scope);
                 if (symbol != NULL) {
                     $$ = symbol->value;
@@ -242,8 +242,8 @@ void verify_types_match(runtime_value_t val1, runtime_value_t val2) {
 }
 
 void assign_symbol(symbol_t *sym, runtime_value_t val) {
-    verify_types_match(sym->value, val);
-    sym->value = val;
+    verify_types_match(sym->value,val);
+    sym->value = convert_to_type(val,sym->value.type);
 }
 
 void print_val(runtime_value_t val, int new_line) {
@@ -269,12 +269,12 @@ void print_val(runtime_value_t val, int new_line) {
 }
 
 runtime_value_t add_expressions(runtime_value_t val1, runtime_value_t val2) {
-    verify_types_match(val1, val2);
+    verify_types_match(val1,val2);
     runtime_value_t result;
     switch(val1.type) {
         case TYPE_INTEGER:
         case TYPE_DECIMAL: {
-            return mathematical_operation(val1, val2, OP_ADDITION);
+            return mathematical_operation(val1,val2,OP_ADDITION);
         }
         case TYPE_STRING: {
             result.type = val1.type;
@@ -288,8 +288,8 @@ runtime_value_t add_expressions(runtime_value_t val1, runtime_value_t val2) {
                 return result;
             }
             
-            strcpy(concat_str, val1.value.sval);
-            strcat(concat_str, val2.value.sval);
+            strcpy(concat_str,val1.value.sval);
+            strcat(concat_str,val2.value.sval);
             
             result.value.sval = concat_str;
             break;
@@ -362,13 +362,13 @@ runtime_value_t mathematical_operation(runtime_value_t val1, runtime_value_t val
             result.type = TYPE_DECIMAL;
             double dval1;
             if (val1.type == TYPE_INTEGER) {
-                dval1 = val1.value.ival;
+                dval1 = (double) val1.value.ival;
             } else {
                 dval1 = val1.value.dval;
             }
             double dval2;
             if (val1.type == TYPE_INTEGER) {
-                dval2 = val2.value.ival;
+                dval2 = (double) val2.value.ival;
             } else {
                 dval2 = val2.value.dval;
             }
@@ -393,7 +393,6 @@ runtime_value_t mathematical_operation(runtime_value_t val1, runtime_value_t val
             }
         }
     }
-
     return result;
 }
 
@@ -403,28 +402,27 @@ runtime_value_t convert_to_type(runtime_value_t val, variable_type_t new_type) {
 
     runtime_value_t result;
     result.type = new_type;
-    /*
-    switch(0) {
-        case (val.type == TYPE_INTEGER) && (new_type == TYPE_DECIMAL): {
-            result.value.dval = (double) val.value.ival;
-            break;
-        }
-        case (val.type == TYPE_INTEGER) && (new_type == TYPE_STRING): {
-            break;
-        }
-        case (val.type == TYPE_DECIMAL) && (new_type == TYPE_INTEGER): {
-            result.value.ival = (int) val.value.dval;
-            break;
-        }
-        case (val.type == TYPE_DECIMAL) && (new_type == TYPE_STRING): {
-            break;
-        }
+    if ((val.type == TYPE_INTEGER) && (new_type == TYPE_DECIMAL)) {
+        result.value.dval = (double) val.value.ival;
+    } else if ((val.type == TYPE_INTEGER) && (new_type == TYPE_STRING)) {
+        char istr[12]; // 2147483647 is maximum
+        sprintf(istr,"%d",result.value.ival);
+        result.value.sval = istr;
+    } else if ((val.type == TYPE_DECIMAL) && (new_type == TYPE_INTEGER)) {
+        result.value.ival = (int) val.value.dval;
+    } else if ((val.type == TYPE_DECIMAL) && (new_type == TYPE_STRING)) {
+        char dstr[100]; // we have ~15 decimal places, plus the actual number. So we need space.
+        sprintf(dstr,"%f",result.value.dval);
+        result.value.sval = dstr;
+    } else {
+        yyerror("type conversion impossible.");
+        result.type = TYPE_INTEGER;
+        result.value.ival = 0;
     }
-    */
     return result;
 }
 
 int main(void)
 {
-  return yyparse();
+    return yyparse();
 }
