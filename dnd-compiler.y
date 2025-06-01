@@ -4,13 +4,13 @@
 #include <ctype.h>
 #include <stdio.h>
 
-#define ANSI_COLOR_RED     "\x1b[31m"
-#define ANSI_COLOR_GREEN   "\x1b[32m"
-#define ANSI_COLOR_YELLOW  "\x1b[33m"
-#define ANSI_COLOR_BLUE    "\x1b[34m"
-#define ANSI_COLOR_MAGENTA "\x1b[35m"
-#define ANSI_COLOR_CYAN    "\x1b[36m"
-#define ANSI_COLOR_RESET   "\x1b[0m"
+#define TEXT_COLOR_RED     "\x1b[31m"
+#define TEXT_COLOR_GREEN   "\x1b[32m"
+#define TEXT_COLOR_YELLOW  "\x1b[33m"
+#define TEXT_COLOR_BLUE    "\x1b[34m"
+#define TEXT_COLOR_MAGENTA "\x1b[35m"
+#define TEXT_COLOR_CYAN    "\x1b[36m"
+#define TEXT_COLOR_RESET   "\x1b[0m"
 
 ////////////// Symbol Table definitions //////////////
 typedef enum {
@@ -205,15 +205,15 @@ expression : L_INT_TOK      { $$.type = TYPE_INTEGER; $$.value.ival = $1; }
 void enter_scope() {
     current_scope++;
 
-    printf(ANSI_COLOR_GREEN);
+    printf(TEXT_COLOR_GREEN);
     printf("Entering scope level %d\n", current_scope);
-    printf(ANSI_COLOR_RESET);
+    printf(TEXT_COLOR_RESET);
 }
 
 void exit_scope() {
-    printf(ANSI_COLOR_YELLOW);
+    printf(TEXT_COLOR_YELLOW);
     printf("Exiting scope level %d\n", current_scope);
-    printf(ANSI_COLOR_RESET);
+    printf(TEXT_COLOR_RESET);
 
     // Remove all symbols at current scope level
     for (int i = 0; i < HASH_SIZE; i++) {
@@ -223,9 +223,9 @@ void exit_scope() {
                 symbol_t* to_remove = *sym_ptr;
                 *sym_ptr = (*sym_ptr)->next;
                 
-                printf(ANSI_COLOR_RED);
+                printf(TEXT_COLOR_RED);
                 printf("Removing symbol: %s (scope %d)\n", to_remove->name, to_remove->scope_level);
-                printf(ANSI_COLOR_RESET);
+                printf(TEXT_COLOR_RESET);
 
                 free(to_remove->name);
                 free(to_remove);
@@ -269,9 +269,9 @@ symbol_t* lookup_in_scope(char* name, int scope) {
     symbol_t* sym = symbol_table[h];
 
     while (lookup_scope >= 0) {
-        printf(ANSI_COLOR_CYAN);
+        printf(TEXT_COLOR_CYAN);
         printf("looking up %s (scope %d)\n", name, lookup_scope);
-        printf(ANSI_COLOR_RESET);
+        printf(TEXT_COLOR_RESET);
 
         while (sym) {
             if (strcmp(sym->name, name) == 0 && sym->scope_level == lookup_scope) {
@@ -563,9 +563,9 @@ runtime_value_t compare_expressions(runtime_value_t val1, runtime_value_t val2, 
 }
 
 int expression_is_true(runtime_value_t val) {
-    printf(ANSI_COLOR_MAGENTA);
+    printf(TEXT_COLOR_MAGENTA);
     printf("Evaluating expression %d\n", val.value.ival);
-    printf(ANSI_COLOR_RESET);
+    printf(TEXT_COLOR_RESET);
 
     if (val.type == TYPE_STRING) {
         return val.value.sval != NULL;  // we return "true" if the stored string is not null
@@ -575,9 +575,9 @@ int expression_is_true(runtime_value_t val) {
 }
 
 void add_if_condition(int result) {
-    printf(ANSI_COLOR_MAGENTA);
+    printf(TEXT_COLOR_MAGENTA);
     printf("Adding if-result to stack %d\n", result);
-    printf(ANSI_COLOR_RESET);
+    printf(TEXT_COLOR_RESET);
 
     if (if_condition_id < IF_TRACKER_SIZE) {
         if_condition_id++;
@@ -588,9 +588,9 @@ void add_if_condition(int result) {
 }
 
 void pop_if_condition() {
-    printf(ANSI_COLOR_MAGENTA);
+    printf(TEXT_COLOR_MAGENTA);
     printf("Popping if-result from stack\n");
-    printf(ANSI_COLOR_RESET);
+    printf(TEXT_COLOR_RESET);
 
     if (if_condition_id > 0) {
         if_condition_id--;
