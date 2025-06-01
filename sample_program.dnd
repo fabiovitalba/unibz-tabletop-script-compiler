@@ -10,13 +10,15 @@
     myInt = 42; // 42 is the answer to everything
     prtln("myInt (42): " + myInt);
 
-    if (myInt > 200) {
-        prtln("" + myInt + " is indeed > 200");
+    if (myInt > 40) {
+        prtln("" + myInt + " is indeed > 40");
         myInt = myInt - 200;
     }
+
     if (myInt == 10) {
         prtln("myInt is now " + myInt);
     }
+
     if (myInt < -10) {
         prtln("myInt is obviously larger than -10");
     }
@@ -64,18 +66,18 @@
     
     // Test unassigned int
     int thirdInt;
-    prtln("thirdInt = " + thirdInt);
+    prtln("thirdInt (0) = " + thirdInt);
     
     // Test operations on unassigned int
     int fourthInt;
     fourthInt = 3 * thirdInt;
-    prtln("fourthInt = " + fourthInt);
+    prtln("fourthInt (0) = " + fourthInt);
 
     // Test nested scope
     {
         int nestedInt;
         nestedInt = 5 * myInt;
-        prtln("nestedInt (210) = " + nestedInt);
+        prtln("nestedInt (-790) = " + nestedInt);
 
         // Another nested scope
         {
@@ -91,5 +93,5 @@
 
     // Test unassigned string
     str undefString;
-    prtln("undefString = " + undefString);
+    prtln("undefString (undefined) = " + undefString);
 }

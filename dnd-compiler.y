@@ -152,7 +152,7 @@ stmt_list : statement
 statement : declaration ';'
           | assignment ';'
           | function_exec ';'
-          | IF_TOK '(' expression ')' { if (should_execute_stmt()) add_if_condition(expression_is_true($3)); } block { if (should_execute_stmt()) pop_if_condition(); }
+          | IF_TOK '(' expression ')' { if (should_execute_stmt()) add_if_condition(expression_is_true($3)); } block { pop_if_condition(); }
           ;
 declaration : T_INT_TOK ID_TOK      { if (should_execute_stmt()) $$ = declare_new_symbol($2,TYPE_INTEGER,current_scope); }
             | T_DEC_TOK ID_TOK      { if (should_execute_stmt()) $$ = declare_new_symbol($2,TYPE_DECIMAL,current_scope); }
@@ -536,6 +536,7 @@ runtime_value_t compare_expressions(runtime_value_t val1, runtime_value_t val2, 
     
     switch(op) {
         case OP_GREATER:
+            printf("%f > %f\n",num1,num2);
             result = num1 > num2;
             break;
         case OP_GREATER_EQUAL:
@@ -562,6 +563,10 @@ runtime_value_t compare_expressions(runtime_value_t val1, runtime_value_t val2, 
 }
 
 int expression_is_true(runtime_value_t val) {
+    printf(ANSI_COLOR_MAGENTA);
+    printf("Evaluating expression %d\n", val.value.ival);
+    printf(ANSI_COLOR_RESET);
+
     if (val.type == TYPE_STRING) {
         return val.value.sval != NULL;  // we return "true" if the stored string is not null
     } else {
@@ -570,6 +575,10 @@ int expression_is_true(runtime_value_t val) {
 }
 
 void add_if_condition(int result) {
+    printf(ANSI_COLOR_MAGENTA);
+    printf("Adding if-result to stack %d\n", result);
+    printf(ANSI_COLOR_RESET);
+
     if (if_condition_id < IF_TRACKER_SIZE) {
         if_condition_id++;
         if_condition_result[if_condition_id] = result;
@@ -579,6 +588,10 @@ void add_if_condition(int result) {
 }
 
 void pop_if_condition() {
+    printf(ANSI_COLOR_MAGENTA);
+    printf("Popping if-result from stack\n");
+    printf(ANSI_COLOR_RESET);
+
     if (if_condition_id > 0) {
         if_condition_id--;
     } else {
