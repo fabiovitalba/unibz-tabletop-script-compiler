@@ -94,12 +94,13 @@ int yylex(void);
 %token <ivalue> L_INT_TOK
 %token <dvalue> L_DEC_TOK
 %token <svalue> L_STR_TOK
-%token <svalue> ID
+%token <svalue> ID_TOK
 %token T_INT_TOK
 %token T_STR_TOK
 %token T_DEC_TOK
 %token F_PRINT
 %token F_PRINTLN
+%token IF_TOK
 
 %type <value> expression
 %type <symbol> declaration
@@ -124,12 +125,13 @@ stmt_list : statement
 statement : declaration ';'
           | assignment ';'
           | function_exec ';'
+          | IF_TOK '(' expression ')' block
           ;
-declaration : T_INT_TOK ID      { $$ = declare_new_symbol($2,TYPE_INTEGER,current_scope); }
-            | T_DEC_TOK ID      { $$ = declare_new_symbol($2,TYPE_DECIMAL,current_scope); }
-            | T_STR_TOK ID      { $$ = declare_new_symbol($2,TYPE_STRING,current_scope); }
+declaration : T_INT_TOK ID_TOK      { $$ = declare_new_symbol($2,TYPE_INTEGER,current_scope); }
+            | T_DEC_TOK ID_TOK      { $$ = declare_new_symbol($2,TYPE_DECIMAL,current_scope); }
+            | T_STR_TOK ID_TOK      { $$ = declare_new_symbol($2,TYPE_STRING,current_scope); }
             ;
-assignment : ID '=' expression {
+assignment : ID_TOK '=' expression {
                 symbol_t *symbol = lookup_in_scope($1,current_scope);
                 if (symbol != NULL) {
                     assign_symbol(symbol,$3);
@@ -138,14 +140,14 @@ assignment : ID '=' expression {
                 }
            }
            ;
-function_exec : ID '(' expression ')'           { ; }
+function_exec : ID_TOK '(' expression ')'           { ; }
               | F_PRINT '(' expression ')'      { print_val($3,0); }
               | F_PRINTLN '(' expression ')'    { print_val($3,1); }
               ;
 expression : L_INT_TOK      { $$.type = TYPE_INTEGER; $$.value.ival = $1; }
            | L_DEC_TOK      { $$.type = TYPE_DECIMAL; $$.value.dval = $1; }
            | L_STR_TOK      { $$.type = TYPE_STRING; $$.value.sval = strdup($1); }
-           | ID             {
+           | ID_TOK             {
                 symbol_t *symbol = lookup_in_scope($1,current_scope);
                 if (symbol != NULL) {
                     $$ = symbol->value;
@@ -203,7 +205,7 @@ void exit_scope() {
 }
 
 /**
-* This hash function takes the name of a symbol and returns an ID to be used
+* This hash function takes the name of a symbol and returns an ID_TOK to be used
 * within the symbol table array. This distributes the symbols evenly within
 * the hash table.
 * We multiply by 31 (prime number) in order to have a better distribution of
@@ -228,15 +230,23 @@ symbol_t* declare_new_symbol(char* name, variable_type_t type, int scope) {
 }
 
 symbol_t* lookup_in_scope(char* name, int scope) {
-    //printf("looking up %s (scope %d)\n", name, scope);
+    int lookup_scope = scope;
     int h = hash(name);
     symbol_t* sym = symbol_table[h];
 
-    while (sym) {
-        if (strcmp(sym->name, name) == 0 && sym->scope_level == scope) {
-            return sym;
+    while (lookup_scope >= 0) {
+        printf(ANSI_COLOR_CYAN);
+        printf("looking up %s (scope %d)\n", name, lookup_scope);
+        printf(ANSI_COLOR_RESET);
+
+        while (sym) {
+            if (strcmp(sym->name, name) == 0 && sym->scope_level == lookup_scope) {
+                return sym;
+            }
+            sym = sym->next;
         }
-        sym = sym->next;
+        lookup_scope--;
+        sym = symbol_table[h];
     }
     return NULL;
 }

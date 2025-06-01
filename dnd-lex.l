@@ -13,7 +13,7 @@ INTEGER     {DIGIT}+
 REAL        {INTEGER}(\.{DIGIT}+)?
 LETTER      [a-zA-Z_]
 ALPHANUM    [a-zA-Z0-9_]
-ID          {LETTER}{ALPHANUM}*
+ID_TOK      {LETTER}{ALPHANUM}*
 
 
 %%
@@ -23,6 +23,7 @@ ID          {LETTER}{ALPHANUM}*
 "int"       { return T_INT_TOK; }
 "dec"       { return T_DEC_TOK; }
 "str"       { return T_STR_TOK; }
+"if"        { return IF_TOK; }
 "prt"       { return F_PRINT; }
 "prtln"     { return F_PRINTLN; }
 
@@ -30,10 +31,6 @@ ID          {LETTER}{ALPHANUM}*
 \n          { /* skip newlines */ line_number++; }
 \t          { /* skip tabs */ }
 "//".*\n    { /* skip comment lines */ }
-
-    /*[iI][fF] {
-    return IF;
-    }*/
 
 {INTEGER}   {
     yylval.ivalue = atoi(yytext);
@@ -53,9 +50,9 @@ ID          {LETTER}{ALPHANUM}*
     return L_STR_TOK;
 }
 
-{ID}        {
+{ID_TOK}        {
     yylval.svalue = strdup(yytext); // duplicate string, since yytext is overwritten constantly
-    return ID;
+    return ID_TOK;
 }
 
     /* Operators, Scopes and Delimiters */

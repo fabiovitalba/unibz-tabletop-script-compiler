@@ -63,8 +63,8 @@
     // Test nested scope
     {
         int nestedInt;
-        nestedInt = 5;
-        prtln("nestedInt (5) = " + nestedInt);
+        nestedInt = 5 * myInt;
+        prtln("nestedInt (210) = " + nestedInt);
 
         // Another nested scope
         {
