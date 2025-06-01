@@ -1,0 +1,97 @@
+{
+    {
+        int nestedInt;
+        nestedInt = 20;
+        prtln("nestedInt (20) = " + nestedInt);
+    }
+
+    // Test integer type with indirect value assignment
+    int myInt;
+    myInt = 42; // 42 is the answer to everything
+    prtln("myInt (42): " + myInt);
+
+    if (myInt > 40) {
+        prtln("" + myInt + " is indeed > 40");
+        myInt = myInt - 200;
+    }
+
+    if (myInt == 10) {
+        prtln("myInt is now " + myInt);
+    }
+
+    if (myInt < -10) {
+        prtln("myInt is obviously larger than -10");
+    }
+
+    // Test decimal type with indirect value assignment
+    dec myDecimal;
+    myDecimal = 3.14 + 3.5;
+    prtln("myDecimal (6.640000): " + myDecimal);
+    
+    // Test integer type with indirect assignment and simple operations
+    int secondInt;
+    secondInt = myInt + 1 * 3;
+    prtln("secondInt (45): " + secondInt);
+
+    // Test negation of decimal type
+    dec negDec;
+    negDec = -20.0;
+    prtln("negDec (-20) = " + negDec);
+    negDec = negDec + 40.0;
+    negDec = negDec * -2.0;
+    negDec = -negDec;
+    prtln("negDec (40) = " + negDec);
+
+    // Test decimal type with indirect assignment and simple operations
+    dec secondDec;
+    secondDec = myDecimal - 2.0 / 3.0;
+    prtln("secondDec (5.973333) = " + secondDec);
+
+    // Test implicit decimal conversion
+    dec implDec;
+    implDec = 3;
+    implDec = implDec * 3;
+    prtln("implDec (9.000000) = " + implDec);
+
+    // Test implicit int conversion
+    int implInt;
+    implInt = 3.14;
+    prtln("implInt (3) = " + implInt);
+    
+    // Test string type with indirect assignment and concatenation
+    str myString;
+    myString = "Marvin" + " is a nice " + "Roboter";
+    prt("myString: ");
+    prtln(myString);
+    
+    // Test unassigned int
+    int thirdInt;
+    prtln("thirdInt (0) = " + thirdInt);
+    
+    // Test operations on unassigned int
+    int fourthInt;
+    fourthInt = 3 * thirdInt;
+    prtln("fourthInt (0) = " + fourthInt);
+
+    // Test nested scope
+    {
+        int nestedInt;
+        nestedInt = 5 * myInt;
+        prtln("nestedInt (-790) = " + nestedInt);
+
+        // Another nested scope
+        {
+            dec nestedDec;
+            nestedDec = 4.20;
+            prtln("nestedDec (4.200000) = " + nestedDec);
+        }
+
+        dec nestedDec;
+        nestedDec = 6.66;
+        prtln("nestedDec (6.660000) = " + nestedDec);
+    }
+
+    // Test unassigned string
+    str undefString;
+    prtln("undefString (undefined) = " + undefString);
+}
