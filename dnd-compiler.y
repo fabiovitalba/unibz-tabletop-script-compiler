@@ -66,8 +66,11 @@ runtime_value_t add_expressions(runtime_value_t val1, runtime_value_t val2);
 runtime_value_t mathematical_operation(runtime_value_t val1, runtime_value_t val2, math_op_t op);
 runtime_value_t negate_expression(runtime_value_t val);
 runtime_value_t convert_to_type(runtime_value_t val, variable_type_t new_type);
+runtime_value_t create_integer_value(int value);
+runtime_value_t create_decimal_value(double value);
+runtime_value_t create_string_value(char* value);
+double get_numeric_value(runtime_value_t val);
 int yylex(void);
-
 
 %}
 
@@ -304,123 +307,126 @@ runtime_value_t add_expressions(runtime_value_t val1, runtime_value_t val2) {
 }
 
 runtime_value_t negate_expression(runtime_value_t val) {
-    runtime_value_t result;
-    result.type = val.type;
-    switch(val.type) {
-        case TYPE_INTEGER: {
-            result.value.ival = -val.value.ival;
-            break;
-        }
-        case TYPE_DECIMAL: {
-            result.value.dval = -val.value.dval;
-            break;
-        }
-        default:
-            yyerror("Unsupported type for negation");
-            result.type = TYPE_INTEGER;
-            result.value.ival = 0;
-    }
-
-    return result;
-}
-
-/**
-* This method takes two values and executes mathematical operations on them.
-* It automatically converts to "dec" values where necessary.
-*/
-runtime_value_t mathematical_operation(runtime_value_t val1, runtime_value_t val2, math_op_t op) {
-    runtime_value_t result;
-    if ((val1.type == TYPE_STRING) || (val2.type == TYPE_STRING)) {
-        yyerror("str does not support this operation.");
-        result.type = TYPE_INTEGER;
-        result.value.ival = 0;
-        return result;
+    if (val.type == TYPE_STRING) {
+        yyerror("Unsupported type for negation");
+        return create_integer_value(0);
     }
     
-    if ((val1.type == val2.type) && (val1.type == TYPE_INTEGER)) {
-        result.type = TYPE_INTEGER;
-        int ival1 = val1.value.ival;
-        int ival2 = val2.value.ival;
-
-        switch(op) {
-            case OP_ADDITION: {
-                result.value.ival = ival1 + ival2;
-                break;
-            }
-            case OP_SUBTRACTION: {
-                result.value.ival = ival1 - ival2;
-                break;
-            }
-            case OP_MULTIPLICATION: {
-                result.value.ival = ival1 * ival2;
-                break;
-            }
-            case OP_DIVISION: {
-                result.value.ival = ival1 / ival2;
-                break;
-            }
-        }
-    } else {
-        result.type = TYPE_DECIMAL;
-        double dval1;
-        if (val1.type == TYPE_INTEGER) {
-            dval1 = (double) val1.value.ival;
-        } else {
-            dval1 = val1.value.dval;
-        }
-        double dval2;
-        if (val2.type == TYPE_INTEGER) {
-            dval2 = (double) val2.value.ival;
-        } else {
-            dval2 = val2.value.dval;
-        }
-
-        switch(op) {
-            case OP_ADDITION: {
-                result.value.dval = dval1 + dval2;
-                break;
-            }
-            case OP_SUBTRACTION: {
-                result.value.dval = dval1 - dval2;
-                break;
-            }
-            case OP_MULTIPLICATION: {
-                result.value.dval = dval1 * dval2;
-                break;
-            }
-            case OP_DIVISION: {
-                result.value.dval = dval1 / dval2;
-                break;
-            }
-        }
+    double numeric_val = get_numeric_value(val);
+    if (val.type == TYPE_INTEGER) {
+        return create_integer_value(-(int)numeric_val);
     }
-    return result;
+    return create_decimal_value(-numeric_val);
+}
+
+runtime_value_t mathematical_operation(runtime_value_t val1, runtime_value_t val2, math_op_t op) {
+    if (val1.type == TYPE_STRING || val2.type == TYPE_STRING) {
+        yyerror("str does not support this operation.");
+        return create_integer_value(0);
+    }
+
+    double num1 = get_numeric_value(val1);
+    double num2 = get_numeric_value(val2);
+    double result;
+
+    switch(op) {
+        case OP_ADDITION:
+            result = num1 + num2;
+            break;
+        case OP_SUBTRACTION:
+            result = num1 - num2;
+            break;
+        case OP_MULTIPLICATION:
+            result = num1 * num2;
+            break;
+        case OP_DIVISION:
+            if (num2 == 0) {
+                yyerror("Division by zero");
+                return create_integer_value(0);
+            }
+            result = num1 / num2;
+            break;
+        default:
+            yyerror("Unknown operation");
+            return create_integer_value(0);
+    }
+
+    if (val1.type == TYPE_INTEGER && val2.type == TYPE_INTEGER && 
+        result == (int)result) {
+        return create_integer_value((int)result);
+    }
+    
+    return create_decimal_value(result);
 }
 
 runtime_value_t convert_to_type(runtime_value_t val, variable_type_t new_type) {
-    if (val.type == new_type)
+    if (val.type == new_type) {
         return val;
-
-    runtime_value_t result;
-    result.type = new_type;
-    if ((val.type == TYPE_INTEGER) && (new_type == TYPE_DECIMAL)) {
-        result.value.dval = (double) val.value.ival;
-    } else if ((val.type == TYPE_INTEGER) && (new_type == TYPE_STRING)) {
-        char istr[12]; // 2147483647 is maximum
-        sprintf(istr,"%d",val.value.ival);
-        result.value.sval = strdup(istr);
-    } else if ((val.type == TYPE_DECIMAL) && (new_type == TYPE_INTEGER)) {
-        result.value.ival = (int) val.value.dval;
-    } else if ((val.type == TYPE_DECIMAL) && (new_type == TYPE_STRING)) {
-        char dstr[100]; // we have ~15 decimal places, plus the actual number. So we need space.
-        sprintf(dstr,"%f",val.value.dval);
-        result.value.sval = strdup(dstr);
-    } else {
-        yyerror("type conversion impossible.");
-        result.type = TYPE_INTEGER;
-        result.value.ival = 0;
     }
+
+    switch(new_type) {
+        case TYPE_INTEGER:
+            if (val.type == TYPE_DECIMAL) {
+                return create_integer_value((int)val.value.dval);
+            }
+            if (val.type == TYPE_STRING) {
+                return create_integer_value(atoi(val.value.sval));
+            }
+            break;
+
+        case TYPE_DECIMAL:
+            if (val.type == TYPE_INTEGER) {
+                return create_decimal_value((double)val.value.ival);
+            }
+            if (val.type == TYPE_STRING) {
+                return create_decimal_value(atof(val.value.sval));
+            }
+            break;
+
+        case TYPE_STRING: {
+            char buffer[100];
+            if (val.type == TYPE_INTEGER) {
+                sprintf(buffer, "%d", val.value.ival);
+                return create_string_value(buffer);
+            }
+            if (val.type == TYPE_DECIMAL) {
+                sprintf(buffer, "%f", val.value.dval);
+                return create_string_value(buffer);
+            }
+            break;
+        }
+    }
+
+    yyerror("Type conversion impossible");
+    return create_integer_value(0);
+}
+
+runtime_value_t create_integer_value(int value) {
+    runtime_value_t result;
+    result.type = TYPE_INTEGER;
+    result.value.ival = value;
     return result;
+}
+
+runtime_value_t create_decimal_value(double value) {
+    runtime_value_t result;
+    result.type = TYPE_DECIMAL;
+    result.value.dval = value;
+    return result;
+}
+
+runtime_value_t create_string_value(char* value) {
+    runtime_value_t result;
+    result.type = TYPE_STRING;
+    result.value.sval = strdup(value);
+    return result;
+}
+
+double get_numeric_value(runtime_value_t val) {
+    if (val.type == TYPE_INTEGER) {
+        return (double)val.value.ival;
+    }
+    return val.value.dval;
 }
 
 int main(void)
