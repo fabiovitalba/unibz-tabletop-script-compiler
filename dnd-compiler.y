@@ -56,6 +56,14 @@ We use size 101 because it's a prime and allows for even distribution in the has
 */
 #define HASH_SIZE 101
 symbol_t* symbol_table[HASH_SIZE];
+
+/*
+The if_tracker_stack keeps track of which if conditions evaluated to true and which did not.
+*/
+#define IF_TRACKER_SIZE 255
+int if_condition_result[IF_TRACKER_SIZE];
+int if_condition_id = 0;
+
 int current_scope = 0;
 
 
@@ -84,8 +92,12 @@ runtime_value_t create_decimal_value(double value);
 runtime_value_t create_string_value(char* value);
 double get_numeric_value(runtime_value_t val);
 char* get_string_value(runtime_value_t val);
-int yylex(void);
 runtime_value_t compare_expressions(runtime_value_t val1, runtime_value_t val2, math_op_t op);
+int expression_is_true(runtime_value_t val);
+void add_if_condition(int result);
+void pop_if_condition();
+int should_execute_stmt();
+int yylex(void);
 
 %}
 
@@ -140,24 +152,25 @@ stmt_list : statement
 statement : declaration ';'
           | assignment ';'
           | function_exec ';'
-          | IF_TOK '(' expression ')' block {  }
+          | IF_TOK '(' expression ')' { if (should_execute_stmt()) add_if_condition(expression_is_true($3)); } block { if (should_execute_stmt()) pop_if_condition(); }
           ;
-declaration : T_INT_TOK ID_TOK      { $$ = declare_new_symbol($2,TYPE_INTEGER,current_scope); }
-            | T_DEC_TOK ID_TOK      { $$ = declare_new_symbol($2,TYPE_DECIMAL,current_scope); }
-            | T_STR_TOK ID_TOK      { $$ = declare_new_symbol($2,TYPE_STRING,current_scope); }
+declaration : T_INT_TOK ID_TOK      { if (should_execute_stmt()) $$ = declare_new_symbol($2,TYPE_INTEGER,current_scope); }
+            | T_DEC_TOK ID_TOK      { if (should_execute_stmt()) $$ = declare_new_symbol($2,TYPE_DECIMAL,current_scope); }
+            | T_STR_TOK ID_TOK      { if (should_execute_stmt()) $$ = declare_new_symbol($2,TYPE_STRING,current_scope); }
             ;
 assignment : ID_TOK '=' expression {
-                symbol_t *symbol = lookup_in_scope($1,current_scope);
-                if (symbol != NULL) {
-                    assign_symbol(symbol,$3);
-                } else {
-                    yyerror("Undeclared variable");
+                if (should_execute_stmt()) {
+                    symbol_t *symbol = lookup_in_scope($1,current_scope);
+                    if (symbol != NULL) {
+                        assign_symbol(symbol,$3);
+                    } else {
+                        yyerror("Undeclared variable");
+                    }
                 }
            }
            ;
-function_exec : ID_TOK '(' expression ')'           { ; }
-              | F_PRINT '(' expression ')'      { print_val($3,0); }
-              | F_PRINTLN '(' expression ')'    { print_val($3,1); }
+function_exec : F_PRINT '(' expression ')'      { if (should_execute_stmt()) print_val($3,0); }
+              | F_PRINTLN '(' expression ')'    { if (should_execute_stmt()) print_val($3,1); }
               ;
 expression : L_INT_TOK      { $$.type = TYPE_INTEGER; $$.value.ival = $1; }
            | L_DEC_TOK      { $$.type = TYPE_DECIMAL; $$.value.dval = $1; }
@@ -517,7 +530,6 @@ runtime_value_t compare_expressions(runtime_value_t val1, runtime_value_t val2, 
         }
     }
     
-    // For numeric comparisons
     double num1 = get_numeric_value(val1);
     double num2 = get_numeric_value(val2);
     int result;
@@ -549,7 +561,37 @@ runtime_value_t compare_expressions(runtime_value_t val1, runtime_value_t val2, 
     return create_integer_value(result);
 }
 
+int expression_is_true(runtime_value_t val) {
+    if (val.type == TYPE_STRING) {
+        return val.value.sval != NULL;  // we return "true" if the stored string is not null
+    } else {
+        return get_numeric_value(val) != 0;
+    }
+}
+
+void add_if_condition(int result) {
+    if (if_condition_id < IF_TRACKER_SIZE) {
+        if_condition_id++;
+        if_condition_result[if_condition_id] = result;
+    } else {
+        yyerror("Too many nested ifs, cannot track any more.");
+    }
+}
+
+void pop_if_condition() {
+    if (if_condition_id > 0) {
+        if_condition_id--;
+    } else {
+        yyerror("No more if conditions to pop");
+    }
+}
+
+int should_execute_stmt() {
+    return if_condition_result[if_condition_id];
+}
+
 int main(void)
 {
+    if_condition_result[if_condition_id] = 1; // we start with true, otherwise nothing is executed
     return yyparse();
 }

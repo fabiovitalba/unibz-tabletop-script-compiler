@@ -10,6 +10,17 @@
     myInt = 42; // 42 is the answer to everything
     prtln("myInt (42): " + myInt);
 
+    if (myInt > 200) {
+        prtln("" + myInt + " is indeed > 200");
+        myInt = myInt - 200;
+    }
+    if (myInt == 10) {
+        prtln("myInt is now " + myInt);
+    }
+    if (myInt < -10) {
+        prtln("myInt is obviously larger than -10");
+    }
+
     // Test decimal type with indirect value assignment
     dec myDecimal;
     myDecimal = 3.14 + 3.5;
