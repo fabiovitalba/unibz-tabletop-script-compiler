@@ -23,7 +23,13 @@ typedef enum {
     OP_ADDITION,
     OP_SUBTRACTION,
     OP_MULTIPLICATION,
-    OP_DIVISION
+    OP_DIVISION,
+    OP_GREATER,
+    OP_GREATER_EQUAL,
+    OP_LESS,
+    OP_LESS_EQUAL,
+    OP_EQUAL,
+    OP_NOT_EQUAL
 } math_op_t;
 
 // Struct that handles variables of different types
@@ -79,6 +85,7 @@ runtime_value_t create_string_value(char* value);
 double get_numeric_value(runtime_value_t val);
 char* get_string_value(runtime_value_t val);
 int yylex(void);
+runtime_value_t compare_expressions(runtime_value_t val1, runtime_value_t val2, math_op_t op);
 
 %}
 
@@ -115,6 +122,8 @@ int yylex(void);
 
 %left '+' '-'
 %left '*' '/'
+%left GT_TOK GTOE_TOK LT_TOK LTOE_TOK
+%left EQ_TOK NEQ_TOK
 
 
 %%
@@ -166,12 +175,12 @@ expression : L_INT_TOK      { $$.type = TYPE_INTEGER; $$.value.ival = $1; }
            | expression '*' expression      { $$ = mathematical_operation($1,$3,OP_MULTIPLICATION); }
            | expression '/' expression      { $$ = mathematical_operation($1,$3,OP_DIVISION); }
            | '-' expression                 { $$ = negate_expression($2); }
-           | expression GT_TOK expression   {}
-           | expression GTOE_TOK expression {}
-           | expression LT_TOK expression   {}
-           | expression LTOE_TOK expression {}
-           | expression EQ_TOK expression   {}
-           | expression NEQ_TOK expression  {}
+           | expression GT_TOK expression   { $$ = compare_expressions($1,$3,OP_GREATER); }
+           | expression GTOE_TOK expression { $$ = compare_expressions($1,$3,OP_GREATER_EQUAL); }
+           | expression LT_TOK expression   { $$ = compare_expressions($1,$3,OP_LESS); }
+           | expression LTOE_TOK expression { $$ = compare_expressions($1,$3,OP_LESS_EQUAL); }
+           | expression EQ_TOK expression   { $$ = compare_expressions($1,$3,OP_EQUAL); }
+           | expression NEQ_TOK expression  { $$ = compare_expressions($1,$3,OP_NOT_EQUAL); }
            ;
 
 %%
@@ -484,6 +493,60 @@ char* get_string_value(runtime_value_t val) {
     }
     yyerror("Conversion to string impossible.");
     return NULL;
+}
+
+runtime_value_t compare_expressions(runtime_value_t val1, runtime_value_t val2, math_op_t op) {
+    if (val1.type == TYPE_STRING || val2.type == TYPE_STRING) {
+        // Strings can only be compared in equality or inequality
+        if (op != OP_EQUAL && op != OP_NOT_EQUAL) {
+            yyerror("String comparison only supports == and !=");
+            return create_integer_value(0);
+        }
+        
+        char* str1 = get_string_value(val1);
+        char* str2 = get_string_value(val2);
+        int result = strcmp(str1, str2);
+        
+        switch(op) {
+            case OP_EQUAL:
+                return create_integer_value(result == 0);
+            case OP_NOT_EQUAL:
+                return create_integer_value(result != 0);
+            default:
+                return create_integer_value(0);
+        }
+    }
+    
+    // For numeric comparisons
+    double num1 = get_numeric_value(val1);
+    double num2 = get_numeric_value(val2);
+    int result;
+    
+    switch(op) {
+        case OP_GREATER:
+            result = num1 > num2;
+            break;
+        case OP_GREATER_EQUAL:
+            result = num1 >= num2;
+            break;
+        case OP_LESS:
+            result = num1 < num2;
+            break;
+        case OP_LESS_EQUAL:
+            result = num1 <= num2;
+            break;
+        case OP_EQUAL:
+            result = num1 == num2;
+            break;
+        case OP_NOT_EQUAL:
+            result = num1 != num2;
+            break;
+        default:
+            yyerror("Unknown comparison operator");
+            return create_integer_value(0);
+    }
+    
+    return create_integer_value(result);
 }
 
 int main(void)
