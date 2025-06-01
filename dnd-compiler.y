@@ -101,6 +101,12 @@ int yylex(void);
 %token F_PRINT
 %token F_PRINTLN
 %token IF_TOK
+%token GT_TOK
+%token GTOE_TOK
+%token LT_TOK
+%token LTOE_TOK
+%token EQ_TOK
+%token NEQ_TOK
 
 %type <value> expression
 %type <symbol> declaration
@@ -125,7 +131,7 @@ stmt_list : statement
 statement : declaration ';'
           | assignment ';'
           | function_exec ';'
-          | IF_TOK '(' expression ')' block
+          | IF_TOK '(' expression ')' block {  }
           ;
 declaration : T_INT_TOK ID_TOK      { $$ = declare_new_symbol($2,TYPE_INTEGER,current_scope); }
             | T_DEC_TOK ID_TOK      { $$ = declare_new_symbol($2,TYPE_DECIMAL,current_scope); }
@@ -160,6 +166,12 @@ expression : L_INT_TOK      { $$.type = TYPE_INTEGER; $$.value.ival = $1; }
            | expression '*' expression  { $$ = mathematical_operation($1,$3,OP_MULTIPLICATION); }
            | expression '/' expression  { $$ = mathematical_operation($1,$3,OP_DIVISION); }
            | '-' expression             { $$ = negate_expression($2); }
+           | expression GT_TOK expression  {}
+           | expression GTOE_TOK expression {}
+           | expression LT_TOK expression  {}
+           | expression LTOE_TOK expression {}
+           | expression EQ_TOK expression  {}
+           | expression NEQ_TOK expression  {}
            ;
 
 %%

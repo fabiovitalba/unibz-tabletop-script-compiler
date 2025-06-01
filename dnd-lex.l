@@ -26,6 +26,12 @@ ID_TOK      {LETTER}{ALPHANUM}*
 "if"        { return IF_TOK; }
 "prt"       { return F_PRINT; }
 "prtln"     { return F_PRINTLN; }
+">"         { return GT_TOK; }
+">="        { return GTOE_TOK; }
+"<"         { return LT_TOK; }
+">="        { return LTOE_TOK; }
+"=="        { return EQ_TOK; }
+"!="        { return NEQ_TOK; }
 
 [ ]         { /* skip blanks */ }
 \n          { /* skip newlines */ line_number++; }
