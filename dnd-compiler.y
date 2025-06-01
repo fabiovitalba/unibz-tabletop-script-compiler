@@ -4,6 +4,13 @@
 #include <ctype.h>
 #include <stdio.h>
 
+#define ANSI_COLOR_RED     "\x1b[31m"
+#define ANSI_COLOR_GREEN   "\x1b[32m"
+#define ANSI_COLOR_YELLOW  "\x1b[33m"
+#define ANSI_COLOR_BLUE    "\x1b[34m"
+#define ANSI_COLOR_MAGENTA "\x1b[35m"
+#define ANSI_COLOR_CYAN    "\x1b[36m"
+#define ANSI_COLOR_RESET   "\x1b[0m"
 
 ////////////// Symbol Table definitions //////////////
 typedef enum {
@@ -161,11 +168,16 @@ expression : L_INT_TOK      { $$.type = TYPE_INTEGER; $$.value.ival = $1; }
 
 void enter_scope() {
     current_scope++;
+
+    printf(ANSI_COLOR_GREEN);
     printf("Entering scope level %d\n", current_scope);
+    printf(ANSI_COLOR_RESET);
 }
 
 void exit_scope() {
+    printf(ANSI_COLOR_YELLOW);
     printf("Exiting scope level %d\n", current_scope);
+    printf(ANSI_COLOR_RESET);
 
     // Remove all symbols at current scope level
     for (int i = 0; i < HASH_SIZE; i++) {
@@ -174,8 +186,11 @@ void exit_scope() {
             if ((*sym_ptr)->scope_level == current_scope) {
                 symbol_t* to_remove = *sym_ptr;
                 *sym_ptr = (*sym_ptr)->next;
-                printf("Removing symbol: %s (scope %d)\n",
-                       to_remove->name, to_remove->scope_level);
+                
+                printf(ANSI_COLOR_RED);
+                printf("Removing symbol: %s (scope %d)\n", to_remove->name, to_remove->scope_level);
+                printf(ANSI_COLOR_RESET);
+
                 free(to_remove->name);
                 free(to_remove);
             } else {
