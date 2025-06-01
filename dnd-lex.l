@@ -29,7 +29,7 @@ ID_TOK      {LETTER}{ALPHANUM}*
 ">"         { return GT_TOK; }
 ">="        { return GTOE_TOK; }
 "<"         { return LT_TOK; }
-">="        { return LTOE_TOK; }
+"<="        { return LTOE_TOK; }
 "=="        { return EQ_TOK; }
 "!="        { return NEQ_TOK; }
 
