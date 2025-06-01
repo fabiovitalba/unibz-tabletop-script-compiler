@@ -334,62 +334,63 @@ runtime_value_t mathematical_operation(runtime_value_t val1, runtime_value_t val
         yyerror("str does not support this operation.");
         result.type = TYPE_INTEGER;
         result.value.ival = 0;
+        return result;
+    }
+    
+    if ((val1.type == val2.type) && (val1.type == TYPE_INTEGER)) {
+        result.type = TYPE_INTEGER;
+        int ival1 = val1.value.ival;
+        int ival2 = val2.value.ival;
+
+        switch(op) {
+            case OP_ADDITION: {
+                result.value.ival = ival1 + ival2;
+                break;
+            }
+            case OP_SUBTRACTION: {
+                result.value.ival = ival1 - ival2;
+                break;
+            }
+            case OP_MULTIPLICATION: {
+                result.value.ival = ival1 * ival2;
+                break;
+            }
+            case OP_DIVISION: {
+                result.value.ival = ival1 / ival2;
+                break;
+            }
+        }
     } else {
-        if ((val1.type == val2.type) && (val1.type == TYPE_INTEGER)) {
-            result.type = TYPE_INTEGER;
-            int ival1 = val1.value.ival;
-            int ival2 = val2.value.ival;
-
-            switch(op) {
-                case OP_ADDITION: {
-                    result.value.ival = ival1 + ival2;
-                    break;
-                }
-                case OP_SUBTRACTION: {
-                    result.value.ival = ival1 - ival2;
-                    break;
-                }
-                case OP_MULTIPLICATION: {
-                    result.value.ival = ival1 * ival2;
-                    break;
-                }
-                case OP_DIVISION: {
-                    result.value.ival = ival1 / ival2;
-                    break;
-                }
-            }
+        result.type = TYPE_DECIMAL;
+        double dval1;
+        if (val1.type == TYPE_INTEGER) {
+            dval1 = (double) val1.value.ival;
         } else {
-            result.type = TYPE_DECIMAL;
-            double dval1;
-            if (val1.type == TYPE_INTEGER) {
-                dval1 = (double) val1.value.ival;
-            } else {
-                dval1 = val1.value.dval;
-            }
-            double dval2;
-            if (val1.type == TYPE_INTEGER) {
-                dval2 = (double) val2.value.ival;
-            } else {
-                dval2 = val2.value.dval;
-            }
+            dval1 = val1.value.dval;
+        }
+        double dval2;
+        if (val2.type == TYPE_INTEGER) {
+            dval2 = (double) val2.value.ival;
+        } else {
+            dval2 = val2.value.dval;
+        }
 
-            switch(op) {
-                case OP_ADDITION: {
-                    result.value.ival = dval1 + dval2;
-                    break;
-                }
-                case OP_SUBTRACTION: {
-                    result.value.ival = dval1 - dval2;
-                    break;
-                }
-                case OP_MULTIPLICATION: {
-                    result.value.ival = dval1 * dval2;
-                    break;
-                }
-                case OP_DIVISION: {
-                    result.value.ival = dval1 / dval2;
-                    break;
-                }
+        switch(op) {
+            case OP_ADDITION: {
+                result.value.dval = dval1 + dval2;
+                break;
+            }
+            case OP_SUBTRACTION: {
+                result.value.dval = dval1 - dval2;
+                break;
+            }
+            case OP_MULTIPLICATION: {
+                result.value.dval = dval1 * dval2;
+                break;
+            }
+            case OP_DIVISION: {
+                result.value.dval = dval1 / dval2;
+                break;
             }
         }
     }
@@ -406,14 +407,14 @@ runtime_value_t convert_to_type(runtime_value_t val, variable_type_t new_type) {
         result.value.dval = (double) val.value.ival;
     } else if ((val.type == TYPE_INTEGER) && (new_type == TYPE_STRING)) {
         char istr[12]; // 2147483647 is maximum
-        sprintf(istr,"%d",result.value.ival);
-        result.value.sval = istr;
+        sprintf(istr,"%d",val.value.ival);
+        result.value.sval = strdup(istr);
     } else if ((val.type == TYPE_DECIMAL) && (new_type == TYPE_INTEGER)) {
         result.value.ival = (int) val.value.dval;
     } else if ((val.type == TYPE_DECIMAL) && (new_type == TYPE_STRING)) {
         char dstr[100]; // we have ~15 decimal places, plus the actual number. So we need space.
-        sprintf(dstr,"%f",result.value.dval);
-        result.value.sval = dstr;
+        sprintf(dstr,"%f",val.value.dval);
+        result.value.sval = strdup(dstr);
     } else {
         yyerror("type conversion impossible.");
         result.type = TYPE_INTEGER;
