@@ -161,16 +161,16 @@ expression : L_INT_TOK      { $$.type = TYPE_INTEGER; $$.value.ival = $1; }
                     yyerror("Undeclared variable");
                 }
            }
-           | expression '+' expression  { $$ = add_expressions($1,$3); }
-           | expression '-' expression  { $$ = mathematical_operation($1,$3,OP_SUBTRACTION); }
-           | expression '*' expression  { $$ = mathematical_operation($1,$3,OP_MULTIPLICATION); }
-           | expression '/' expression  { $$ = mathematical_operation($1,$3,OP_DIVISION); }
-           | '-' expression             { $$ = negate_expression($2); }
-           | expression GT_TOK expression  {}
+           | expression '+' expression      { $$ = add_expressions($1,$3); }
+           | expression '-' expression      { $$ = mathematical_operation($1,$3,OP_SUBTRACTION); }
+           | expression '*' expression      { $$ = mathematical_operation($1,$3,OP_MULTIPLICATION); }
+           | expression '/' expression      { $$ = mathematical_operation($1,$3,OP_DIVISION); }
+           | '-' expression                 { $$ = negate_expression($2); }
+           | expression GT_TOK expression   {}
            | expression GTOE_TOK expression {}
-           | expression LT_TOK expression  {}
+           | expression LT_TOK expression   {}
            | expression LTOE_TOK expression {}
-           | expression EQ_TOK expression  {}
+           | expression EQ_TOK expression   {}
            | expression NEQ_TOK expression  {}
            ;
 
