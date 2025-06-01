@@ -47,6 +47,12 @@
     implDec = implDec * 3;
     prt("implDec (9.000000) = ");
     prtln(implDec);
+
+    // Test implicit int conversion
+    int implInt;
+    implInt = 3.14;
+    prt("implInt (3) = ");
+    prtln(implInt);
     
     // Test string type with indirect assignment and concatenation
     str myString;
