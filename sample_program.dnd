@@ -7,7 +7,7 @@
 
     // Test integer type with indirect value assignment
     int myInt;
-    myInt = 42;
+    myInt = 42; // 42 is the answer to everything
     prtln("myInt (42): " + myInt);
 
     // Test decimal type with indirect value assignment
