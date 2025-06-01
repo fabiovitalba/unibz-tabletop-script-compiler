@@ -70,6 +70,7 @@ runtime_value_t create_integer_value(int value);
 runtime_value_t create_decimal_value(double value);
 runtime_value_t create_string_value(char* value);
 double get_numeric_value(runtime_value_t val);
+char* get_string_value(runtime_value_t val);
 int yylex(void);
 
 %}
@@ -240,6 +241,9 @@ void verify_types_match(runtime_value_t val1, runtime_value_t val2) {
         if (((val1.type == TYPE_INTEGER) && (val2.type == TYPE_DECIMAL)) || ((val1.type == TYPE_DECIMAL) && (val2.type == TYPE_INTEGER)))
             return; // types can be matched
 
+        if (val1.type == TYPE_STRING)
+            return; // types can be matched as val2 will be converted to string.
+
         yyerror("Type mismatch.");
     }
 }
@@ -281,8 +285,10 @@ runtime_value_t add_expressions(runtime_value_t val1, runtime_value_t val2) {
         }
         case TYPE_STRING: {
             result.type = val1.type;
-            int len1 = strlen(val1.value.sval);
-            int len2 = strlen(val2.value.sval);
+            char* str1 = get_string_value(val1);
+            char* str2 = get_string_value(val2);
+            int len1 = strlen(str1);
+            int len2 = strlen(str2);
             
             char* concat_str = malloc(len1 + len2 + 1);
             if (!concat_str) {
@@ -291,8 +297,8 @@ runtime_value_t add_expressions(runtime_value_t val1, runtime_value_t val2) {
                 return result;
             }
             
-            strcpy(concat_str,val1.value.sval);
-            strcat(concat_str,val2.value.sval);
+            strcpy(concat_str,str1);
+            strcat(concat_str,str2);
             
             result.value.sval = concat_str;
             break;
@@ -384,16 +390,7 @@ runtime_value_t convert_to_type(runtime_value_t val, variable_type_t new_type) {
             break;
 
         case TYPE_STRING: {
-            char buffer[100];
-            if (val.type == TYPE_INTEGER) {
-                sprintf(buffer, "%d", val.value.ival);
-                return create_string_value(buffer);
-            }
-            if (val.type == TYPE_DECIMAL) {
-                sprintf(buffer, "%f", val.value.dval);
-                return create_string_value(buffer);
-            }
-            break;
+            return create_string_value(get_string_value(val));
         }
     }
 
@@ -427,6 +424,29 @@ double get_numeric_value(runtime_value_t val) {
         return (double)val.value.ival;
     }
     return val.value.dval;
+}
+
+char* get_string_value(runtime_value_t val) {
+    char buffer[100]; // 100 is enough for both double and integer
+    switch(val.type) {
+        case TYPE_INTEGER: {
+            sprintf(buffer, "%d", val.value.ival);
+            return strdup(buffer);
+        }
+        case TYPE_DECIMAL: {
+            sprintf(buffer, "%f", val.value.dval);
+            return strdup(buffer);
+        }
+        case TYPE_STRING: {
+            if (val.value.sval != NULL) {
+                return val.value.sval;
+            } else {
+                return "(undefined)";
+            }
+        }
+    }
+    yyerror("Conversion to string impossible.");
+    return NULL;
 }
 
 int main(void)
