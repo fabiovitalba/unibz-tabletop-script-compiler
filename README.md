@@ -4,6 +4,8 @@ It offers very limited functionality in the programs it interprets.
 
 # Index
 1. Language features
+2. Compiler compilation
+3. Running a program using the compiler
 
 # 1. Language features
 ## 1.0 Language Building Blocks
@@ -79,4 +81,76 @@ Samples:
 
     someStr = "someDec: " + someDec; // someStr is "someDec: 13.0"
 ```
+
+## 1.5 If Control statements
+The language supports basic if statements for control flow. The syntax is similar to C:
+```
+if (condition) {
+    statement;
+    statement;
+    ...
+}
+```
+
+The condition can be any expression that evaluates to a boolean value:
+* Numeric values: 0 is considered false, any other value is true
+* String values: null/undefined strings are false, any other string is true
+* Comparison expressions using `<`, `<=`, `>`, `>=`, `==`, `!=`
+
+Sample:
+```
+if (myInt > 40) {
+    prtln("myInt is greater than 40");
+    myInt = myInt - 200;
+}
+```
+
+## 1.6 Print functions
+The language provides two print functions:
+* `prt(expression)`: Prints the expression without a newline
+* `prtln(expression)`: Prints the expression followed by a newline
+
+Both functions can print any type of value (`int`, `dec`, or `str`). String concatenation can be used to combine multiple values:
+```
+prt("Value: " + myInt);
+prtln("Decimal: " + myDec);
+```
+
+## 1.7 Nested scopes
+The language supports nested scopes through blocks. Each block creates a new scope level where variables can be declared. Variables declared in an outer scope are accessible in inner scopes, but variables declared in an inner scope are not accessible in outer scopes.
+
+Sample:
+```
+{
+    int outerVar;
+    outerVar = 10;
+    
+    {
+        int innerVar;
+        innerVar = 20;
+        prtln(outerVar);  // Can access outerVar
+    }
+    
+    prtln(innerVar);  // Error: innerVar is not accessible here
+}
+```
+
+# 2. Compiler compilation
+## 2.1 Using `flex` and `bison` to compile
+The compiler is built using flex (lexical analyzer) and bison (parser generator). To compile the compiler:
+
+1. Make sure you have flex and bison installed
+2. Run `make` in the project directory
+3. The compiler will be generated as `dnd-compiler.o`
+
+# 3. Running a program using the compiler
+To run a Mini-c program:
+
+1. Write your program in a file with any extension (e.g., `program.dnd`)
+2. Run the compiler with your program file as input:
+   ```
+   ./dnd-compiler.o < program.dnd
+   ```
+
+The compiler will interpret and execute your program, printing any output to the console.
 
