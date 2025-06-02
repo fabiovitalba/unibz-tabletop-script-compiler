@@ -36,6 +36,12 @@ typedef enum {
     OP_NOT_EQUAL
 } math_op_t;
 
+typedef enum {
+    ROLL_NORMAL,
+    ROLL_W_ADV,
+    ROLL_W_DADV
+} dice_mod_t;
+
 // Struct that handles variables of different types
 typedef struct {
     variable_type_t type;
@@ -101,8 +107,8 @@ int expression_is_true(runtime_value_t val);
 void add_if_condition(int result);
 void pop_if_condition();
 int should_execute_stmt();
-runtime_value_t roll_dice_from_string(char* dice_text);
-runtime_value_t roll_dice(int no_of_dice, int no_of_faces);
+runtime_value_t roll_dice_from_string(char* dice_text, dice_mod_t roll_mod);
+runtime_value_t roll_dice(int no_of_dice, int no_of_faces, dice_mod_t roll_mod);
 int yylex(void);
 
 %}
@@ -133,6 +139,8 @@ int yylex(void);
 %token LTOE_TOK
 %token EQ_TOK
 %token NEQ_TOK
+%token ADV_TOK
+%token DADV_TOK
 
 %type <value> expression
 %type <symbol> declaration
@@ -179,11 +187,13 @@ assignment : ID_TOK '=' expression {
 function_exec : F_PRINT '(' expression ')'      { if (should_execute_stmt()) print_val($3,0); }
               | F_PRINTLN '(' expression ')'    { if (should_execute_stmt()) print_val($3,1); }
               ;
-expression : L_INT_TOK      { $$.type = TYPE_INTEGER; $$.value.ival = $1; }
-           | L_DEC_TOK      { $$.type = TYPE_DECIMAL; $$.value.dval = $1; }
-           | L_STR_TOK      { $$.type = TYPE_STRING; $$.value.sval = strdup($1); }
-           | DICE_TOK       { $$ = roll_dice_from_string($1); }
-           | ID_TOK         {
+expression : L_INT_TOK          { $$.type = TYPE_INTEGER; $$.value.ival = $1; }
+           | L_DEC_TOK          { $$.type = TYPE_DECIMAL; $$.value.dval = $1; }
+           | L_STR_TOK          { $$.type = TYPE_STRING; $$.value.sval = strdup($1); }
+           | DICE_TOK           { $$ = roll_dice_from_string($1,ROLL_NORMAL); }
+           | DICE_TOK ADV_TOK   { $$ = roll_dice_from_string($1,ROLL_W_ADV); }
+           | DICE_TOK DADV_TOK  { $$ = roll_dice_from_string($1,ROLL_W_DADV); }
+           | ID_TOK             {
                 symbol_t *symbol = lookup_in_scope($1,current_scope);
                 if (symbol != NULL) {
                     $$ = symbol->value;
@@ -625,7 +635,7 @@ int should_execute_stmt() {
     return if_condition_result[if_condition_id];
 }
 
-runtime_value_t roll_dice_from_string(char* dice_text) {
+runtime_value_t roll_dice_from_string(char* dice_text, dice_mod_t roll_mod) {
     int no_of_dice = 0;
     int no_of_faces = 0;
     char* d_pos = strchr(dice_text, 'd');
@@ -653,10 +663,10 @@ runtime_value_t roll_dice_from_string(char* dice_text) {
         return create_integer_value(0);
     }
     
-    return roll_dice(no_of_dice, no_of_faces);
+    return roll_dice(no_of_dice, no_of_faces, roll_mod);
 }
 
-runtime_value_t roll_dice(int no_of_dice, int no_of_faces) {
+runtime_value_t roll_dice(int no_of_dice, int no_of_faces, dice_mod_t roll_mod) {
     if (DEBUG_MODE) {
         printf(TEXT_COLOR_BLUE);
         printf("Rolling %dd%d\n",no_of_dice,no_of_faces);
@@ -669,6 +679,20 @@ runtime_value_t roll_dice(int no_of_dice, int no_of_faces) {
             printf(TEXT_COLOR_BLUE);
             printf("Rolling 1d%d = %d\n",no_of_faces,curr_roll);
             printf(TEXT_COLOR_RESET);
+        }
+        int second_roll;
+        if ((roll_mod == ROLL_W_ADV) || (roll_mod == ROLL_W_DADV)) {
+            second_roll = rand() % no_of_faces + 1;
+            if (DEBUG_MODE) {
+                printf(TEXT_COLOR_BLUE);
+                printf("Rolling another 1d%d = %d\n",no_of_faces,second_roll);
+                printf(TEXT_COLOR_RESET);
+            }
+            if ((roll_mod == ROLL_W_ADV) && (second_roll > curr_roll)) {
+                curr_roll = second_roll;
+            } else if ((roll_mod == ROLL_W_DADV) && (second_roll < curr_roll)) {
+                curr_roll = second_roll;
+            }
         }
         rolled_value += curr_roll;
     }

@@ -26,6 +26,8 @@ ID_TOK      {LETTER}{ALPHANUM}*
 "if"        { return IF_TOK; }
 "prt"       { return F_PRINT; }
 "prtln"     { return F_PRINTLN; }
+"adv"       { return ADV_TOK; }
+"dadv"      { return DADV_TOK; }
 ">"         { return GT_TOK; }
 ">="        { return GTOE_TOK; }
 "<"         { return LT_TOK; }
