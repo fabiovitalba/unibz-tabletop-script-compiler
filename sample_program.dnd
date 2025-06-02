@@ -97,6 +97,6 @@
 
     // Roll a dice with a bonus
     int rolledValue;
-    rolledValue = 2d20 + 3;
+    rolledValue = 2d20;
     prtln("rolledValue = " + rolledValue);
 }

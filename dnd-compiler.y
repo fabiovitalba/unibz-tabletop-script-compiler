@@ -99,6 +99,7 @@ int expression_is_true(runtime_value_t val);
 void add_if_condition(int result);
 void pop_if_condition();
 int should_execute_stmt();
+runtime_value_t roll_dice_from_string(runtime_value_t val);
 runtime_value_t roll_dice(int no_of_dice, int no_of_faces);
 int yylex(void);
 
@@ -198,7 +199,7 @@ expression : L_INT_TOK      { $$.type = TYPE_INTEGER; $$.value.ival = $1; }
            | expression LTOE_TOK expression { $$ = compare_expressions($1,$3,OP_LESS_EQUAL); }
            | expression EQ_TOK expression   { $$ = compare_expressions($1,$3,OP_EQUAL); }
            | expression NEQ_TOK expression  { $$ = compare_expressions($1,$3,OP_NOT_EQUAL); }
-           | L_INT_TOK DICE_TOK L_INT_TOK   { $$ = roll_dice($1,$3); }
+           | DICE_TOK                       { $$ = roll_dice_from_string($1); }
            ;
 
 %%
@@ -620,6 +621,37 @@ void pop_if_condition() {
 
 int should_execute_stmt() {
     return if_condition_result[if_condition_id];
+}
+
+runtime_value_t roll_dice_from_string(runtime_value_t val) {
+    int no_of_dice = 0;
+    int no_of_faces = 0;
+    char* d_pos = strchr(val.value.sval, 'd');
+    if (!d_pos) {
+        d_pos = strchr(val.value.sval, 'D');
+    }
+    
+    if (!d_pos) {
+        yyerror("Invalid dice notation");
+        return create_integer_value(0);
+    }
+    
+    // Parse number of dice
+    char* end_ptr;
+    no_of_dice = strtol(val.value.sval, &end_ptr, 10);
+    if (end_ptr != d_pos || no_of_dice <= 0) {
+        yyerror("Invalid number of dice");
+        return create_integer_value(0);
+    }
+    
+    // Parse number of faces
+    no_of_faces = strtol(d_pos + 1, &end_ptr, 10);
+    if (*end_ptr != '\0' || no_of_faces <= 0) {
+        yyerror("Invalid number of faces");
+        return create_integer_value(0);
+    }
+    
+    return roll_dice(no_of_dice, no_of_faces);
 }
 
 runtime_value_t roll_dice(int no_of_dice, int no_of_faces) {

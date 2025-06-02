@@ -38,7 +38,10 @@ ID_TOK      {LETTER}{ALPHANUM}*
 \t          { /* skip tabs */ }
 "//".*\n    { /* skip comment lines */ }
 
-[dD]        { return DICE_TOK; }
+[0-9]+[dD][0-9]+    {
+    yylval.svalue = strdup(yytext);
+    return DICE_TOK;
+}
 
 {INTEGER}   {
     yylval.ivalue = atoi(yytext);
