@@ -99,7 +99,7 @@ int expression_is_true(runtime_value_t val);
 void add_if_condition(int result);
 void pop_if_condition();
 int should_execute_stmt();
-runtime_value_t roll_dice_from_string(runtime_value_t val);
+runtime_value_t roll_dice_from_string(char* dice_text);
 runtime_value_t roll_dice(int no_of_dice, int no_of_faces);
 int yylex(void);
 
@@ -117,6 +117,7 @@ int yylex(void);
 %token <ivalue> L_INT_TOK
 %token <dvalue> L_DEC_TOK
 %token <svalue> L_STR_TOK
+%token <svalue> DICE_TOK
 %token <svalue> ID_TOK
 %token T_INT_TOK
 %token T_STR_TOK
@@ -130,7 +131,6 @@ int yylex(void);
 %token LTOE_TOK
 %token EQ_TOK
 %token NEQ_TOK
-%token <value> DICE_TOK
 
 %type <value> expression
 %type <symbol> declaration
@@ -180,7 +180,8 @@ function_exec : F_PRINT '(' expression ')'      { if (should_execute_stmt()) pri
 expression : L_INT_TOK      { $$.type = TYPE_INTEGER; $$.value.ival = $1; }
            | L_DEC_TOK      { $$.type = TYPE_DECIMAL; $$.value.dval = $1; }
            | L_STR_TOK      { $$.type = TYPE_STRING; $$.value.sval = strdup($1); }
-           | ID_TOK             {
+           | DICE_TOK       { $$ = roll_dice_from_string($1); }
+           | ID_TOK         {
                 symbol_t *symbol = lookup_in_scope($1,current_scope);
                 if (symbol != NULL) {
                     $$ = symbol->value;
@@ -199,7 +200,6 @@ expression : L_INT_TOK      { $$.type = TYPE_INTEGER; $$.value.ival = $1; }
            | expression LTOE_TOK expression { $$ = compare_expressions($1,$3,OP_LESS_EQUAL); }
            | expression EQ_TOK expression   { $$ = compare_expressions($1,$3,OP_EQUAL); }
            | expression NEQ_TOK expression  { $$ = compare_expressions($1,$3,OP_NOT_EQUAL); }
-           | DICE_TOK                       { $$ = roll_dice_from_string($1); }
            ;
 
 %%
@@ -623,12 +623,12 @@ int should_execute_stmt() {
     return if_condition_result[if_condition_id];
 }
 
-runtime_value_t roll_dice_from_string(runtime_value_t val) {
+runtime_value_t roll_dice_from_string(char* dice_text) {
     int no_of_dice = 0;
     int no_of_faces = 0;
-    char* d_pos = strchr(val.value.sval, 'd');
+    char* d_pos = strchr(dice_text, 'd');
     if (!d_pos) {
-        d_pos = strchr(val.value.sval, 'D');
+        d_pos = strchr(dice_text, 'D');
     }
     
     if (!d_pos) {
@@ -638,7 +638,7 @@ runtime_value_t roll_dice_from_string(runtime_value_t val) {
     
     // Parse number of dice
     char* end_ptr;
-    no_of_dice = strtol(val.value.sval, &end_ptr, 10);
+    no_of_dice = strtol(dice_text, &end_ptr, 10);
     if (end_ptr != d_pos || no_of_dice <= 0) {
         yyerror("Invalid number of dice");
         return create_integer_value(0);
@@ -662,7 +662,13 @@ runtime_value_t roll_dice(int no_of_dice, int no_of_faces) {
     }
     int rolled_value = 0;
     for (int i = 0; i < no_of_dice; i++) {
-        rolled_value += rand() % no_of_faces + 1;
+        int curr_roll = rand() % no_of_faces + 1;
+        if (DEBUG_MODE) {
+            printf(TEXT_COLOR_BLUE);
+            printf("Rolling 1d%d = %d\n",no_of_faces,curr_roll);
+            printf(TEXT_COLOR_RESET);
+        }
+        rolled_value += curr_roll;
     }
 
     if (DEBUG_MODE) {
