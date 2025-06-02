@@ -26,6 +26,8 @@ ID_TOK      {LETTER}{ALPHANUM}*
 "if"        { return IF_TOK; }
 "prt"       { return F_PRINT; }
 "prtln"     { return F_PRINTLN; }
+"adv"       { return ADV_TOK; }
+"dadv"      { return DADV_TOK; }
 ">"         { return GT_TOK; }
 ">="        { return GTOE_TOK; }
 "<"         { return LT_TOK; }
@@ -37,6 +39,11 @@ ID_TOK      {LETTER}{ALPHANUM}*
 \n          { /* skip newlines */ line_number++; }
 \t          { /* skip tabs */ }
 "//".*\n    { /* skip comment lines */ }
+
+[0-9]+[dD][0-9]+    {
+    yylval.svalue = strdup(yytext);
+    return DICE_TOK;
+}
 
 {INTEGER}   {
     yylval.ivalue = atoi(yytext);
