@@ -99,6 +99,7 @@ int expression_is_true(runtime_value_t val);
 void add_if_condition(int result);
 void pop_if_condition();
 int should_execute_stmt();
+runtime_value_t roll_dice(int no_of_dice, int no_of_faces);
 int yylex(void);
 
 %}
@@ -128,6 +129,7 @@ int yylex(void);
 %token LTOE_TOK
 %token EQ_TOK
 %token NEQ_TOK
+%token <value> DICE_TOK
 
 %type <value> expression
 %type <symbol> declaration
@@ -196,6 +198,7 @@ expression : L_INT_TOK      { $$.type = TYPE_INTEGER; $$.value.ival = $1; }
            | expression LTOE_TOK expression { $$ = compare_expressions($1,$3,OP_LESS_EQUAL); }
            | expression EQ_TOK expression   { $$ = compare_expressions($1,$3,OP_EQUAL); }
            | expression NEQ_TOK expression  { $$ = compare_expressions($1,$3,OP_NOT_EQUAL); }
+           | L_INT_TOK DICE_TOK L_INT_TOK   { $$ = roll_dice($1,$3); }
            ;
 
 %%
@@ -617,6 +620,26 @@ void pop_if_condition() {
 
 int should_execute_stmt() {
     return if_condition_result[if_condition_id];
+}
+
+runtime_value_t roll_dice(int no_of_dice, int no_of_faces) {
+    if (DEBUG_MODE) {
+        printf(TEXT_COLOR_BLUE);
+        printf("Rolling %dd%d\n",no_of_dice,no_of_faces);
+        printf(TEXT_COLOR_RESET);
+    }
+    int rolled_value = 0;
+    for (int i = 0; i < no_of_dice; i++) {
+        rolled_value += rand() % no_of_faces + 1;
+    }
+
+    if (DEBUG_MODE) {
+        printf(TEXT_COLOR_BLUE);
+        printf("Result %d\n",rolled_value);
+        printf(TEXT_COLOR_RESET);
+    }
+
+    return create_integer_value(rolled_value);
 }
 
 int main(void)

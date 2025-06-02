@@ -94,4 +94,9 @@
     // Test unassigned string
     str undefString;
     prtln("undefString (undefined) = " + undefString);
+
+    // Roll a dice with a bonus
+    int rolledValue;
+    rolledValue = 2d20 + 3;
+    prtln("rolledValue = " + rolledValue);
 }
