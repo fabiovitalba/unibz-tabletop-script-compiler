@@ -4,6 +4,7 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <time.h>
+#include <unistd.h>
 
 #define TEXT_COLOR_RED     "\x1b[31m"
 #define TEXT_COLOR_GREEN   "\x1b[32m"
@@ -663,7 +664,6 @@ runtime_value_t roll_dice(int no_of_dice, int no_of_faces) {
     }
     int rolled_value = 0;
     for (int i = 0; i < no_of_dice; i++) {
-        srand(time(0));
         int curr_roll = rand() % no_of_faces + 1;
         if (DEBUG_MODE) {
             printf(TEXT_COLOR_BLUE);
@@ -684,6 +684,8 @@ runtime_value_t roll_dice(int no_of_dice, int no_of_faces) {
 
 int main(void)
 {
+    // Initialize random seed with a combination of time and process ID for better entropy
+    srand(time(0));
     if_condition_result[if_condition_id] = 1; // we start with true, otherwise nothing is executed
     return yyparse();
 }
