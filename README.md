@@ -135,6 +135,44 @@ Sample:
 }
 ```
 
+## 1.8 Dice Rolling
+The language supports dice rolling expressions, which are useful for tabletop role-playing games. The syntax follows the standard dice notation format.
+
+### 1.8.1 Basic Dice Rolling
+Dice rolls are expressed using the format `NdM` where:
+- `N` is the number of dice to roll
+- `M` is the number of faces on each die
+
+Sample:
+```
+{
+    int rollResult;
+    rollResult = 2d6;      // Rolls 2 six-sided dice
+    rollResult = 1d20;     // Rolls 1 twenty-sided die
+    rollResult = 3d8 + 2;  // Rolls 3 eight-sided dice and adds 2 to the result
+}
+```
+
+### 1.8.2 Dice Rolling with Modifiers
+The language supports two special dice rolling modifiers:
+- `adv`: Rolls with advantage (rolls twice and takes the higher result)
+- `dadv`: Rolls with disadvantage (rolls twice and takes the lower result)
+
+Sample:
+```
+{
+    int rollWithAdvantage;
+    rollWithAdvantage = 1d20 adv;     // Rolls 1d20 with advantage
+    rollWithAdvantage = 2d8 adv + 3;  // Rolls 2d8 with advantage and adds 3
+
+    int rollWithDisadvantage;
+    rollWithDisadvantage = 1d20 dadv;     // Rolls 1d20 with disadvantage
+    rollWithDisadvantage = 3d6 dadv + 2;  // Rolls 3d6 with disadvantage and adds 2
+}
+```
+
+The dice rolling results can be used in any expression, including variable assignments and print statements. The results are always of type `int`.
+
 # 2. Compiler compilation
 ## 2.1 Using `flex` and `bison` to compile
 The compiler is built using flex (lexical analyzer) and bison (parser generator). To compile the compiler:
