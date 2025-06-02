@@ -3,6 +3,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdio.h>
+#include <time.h>
 
 #define TEXT_COLOR_RED     "\x1b[31m"
 #define TEXT_COLOR_GREEN   "\x1b[32m"
@@ -662,6 +663,7 @@ runtime_value_t roll_dice(int no_of_dice, int no_of_faces) {
     }
     int rolled_value = 0;
     for (int i = 0; i < no_of_dice; i++) {
+        srand(time(0));
         int curr_roll = rand() % no_of_faces + 1;
         if (DEBUG_MODE) {
             printf(TEXT_COLOR_BLUE);
