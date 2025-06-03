@@ -562,7 +562,6 @@ runtime_value_t compare_expressions(runtime_value_t val1, runtime_value_t val2, 
     
     switch(op) {
         case OP_GREATER:
-            printf("%f > %f\n",num1,num2);
             result = num1 > num2;
             break;
         case OP_GREATER_EQUAL:

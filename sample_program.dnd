@@ -110,4 +110,15 @@
     rolledValueWDadv = 3d12 dadv + 2;
     prtln("rolledValueWDadv = " + rolledValueWDadv);
     
+    if (1d20 adv >= 10) {
+        prtln("Easy check succeed!");
+    }
+
+    if (1d20 adv >= 15) {
+        prtln("Medium check succeed!");
+    }
+
+    if (1d20 adv >= 18) {
+        prtln("Difficult check succeed!");
+    }
 }
