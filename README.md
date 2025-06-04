@@ -209,3 +209,102 @@ The repository includes two sample programs:
 - `sample_program.dnd`: Basic examples of language features
 - `edge_cases.dnd`: Examples of edge cases and complex expressions
 
+# 5. Language Grammar
+The following is the formal grammar of the language using Backus-Naur Form (BNF) notation:
+
+## 5.1 Program Structure
+```
+program → block
+
+block → '{' stmt_list '}'
+
+stmt_list → statement
+         | statement stmt_list
+         | block
+         | block stmt_list
+
+statement → declaration ';'
+         | assignment ';'
+         | function_exec ';'
+         | if_stmt
+```
+
+## 5.2 Declarations and Assignments
+```
+declaration → T_INT_TOK ID_TOK
+           | T_DEC_TOK ID_TOK
+           | T_STR_TOK ID_TOK
+
+assignment → ID_TOK '=' expression
+
+if_stmt → IF_TOK '(' expression ')' block
+```
+
+## 5.3 Expressions
+```
+expression → L_INT_TOK
+          | L_DEC_TOK
+          | L_STR_TOK
+          | DICE_TOK
+          | DICE_TOK ADV_TOK
+          | DICE_TOK DADV_TOK
+          | ID_TOK
+          | '(' expression ')'
+          | expression '+' expression
+          | expression '-' expression
+          | expression '*' expression
+          | expression '/' expression
+          | '-' expression
+          | expression GT_TOK expression
+          | expression GTOE_TOK expression
+          | expression LT_TOK expression
+          | expression LTOE_TOK expression
+          | expression EQ_TOK expression
+          | expression NEQ_TOK expression
+```
+
+## 5.4 Function Calls
+```
+function_exec → F_PRINT '(' expression ')'
+             | F_PRINTLN '(' expression ')'
+```
+
+## 5.5 Terminals
+```
+T_INT_TOK    → "int"
+T_DEC_TOK    → "dec"
+T_STR_TOK    → "str"
+IF_TOK       → "if"
+F_PRINT      → "prt"
+F_PRINTLN    → "prtln"
+ADV_TOK      → "adv"
+DADV_TOK     → "dadv"
+GT_TOK       → ">"
+GTOE_TOK     → ">="
+LT_TOK       → "<"
+LTOE_TOK     → "<="
+EQ_TOK       → "=="
+NEQ_TOK      → "!="
+L_INT_TOK    → [0-9]+
+L_DEC_TOK    → [0-9]+.[0-9]+
+L_STR_TOK    → "[^"]*"
+DICE_TOK     → [0-9]+[dD][0-9]+
+ID_TOK       → [a-zA-Z_][a-zA-Z0-9_]*
+```
+
+## 5.6 Operator Precedence
+The following precedence rules apply (from highest to lowest):
+1. Parentheses `()`
+2. Unary minus `-`
+3. Multiplication `*` and division `/`
+4. Addition `+` and subtraction `-`
+5. Comparison operators `<`, `<=`, `>`, `>=`
+6. Equality operators `==`, `!=`
+
+## 5.7 Type Conversion Rules
+1. If both operands are `int`, the result is `int`
+2. If one operand is `dec`, the result is `dec`
+3. If the left operand is `str`, string concatenation is performed
+4. Comparison operators return `int` (1 for true, 0 for false)
+5. Dice rolls always return `int`
+
