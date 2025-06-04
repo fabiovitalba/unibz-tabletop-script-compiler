@@ -201,7 +201,7 @@ expression : L_INT_TOK          { $$.type = TYPE_INTEGER; $$.value.ival = $1; }
                     yyerror("Undeclared variable");
                 }
            }
-           | '(' expression ')' { $$ = $2; }
+           | '(' expression ')'             { $$ = $2; }
            | expression '+' expression      { $$ = add_expressions($1,$3); }
            | expression '-' expression      { $$ = mathematical_operation($1,$3,OP_SUBTRACTION); }
            | expression '*' expression      { $$ = mathematical_operation($1,$3,OP_MULTIPLICATION); }
