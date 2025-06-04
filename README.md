@@ -1,6 +1,5 @@
-# Mini-c language compiler
-This project is a very basic compiler for a subset of the C programming language.
-It offers very limited functionality in the programs it interprets.
+# Dungeons and Dragons Mini Language Compiler
+This project is a compiler for a custom language designed for Dungeons and Dragons-style tabletop role-playing games. It offers features for basic programming constructs and specialized dice rolling mechanics.
 
 # Index
 1. Language features
@@ -9,7 +8,7 @@ It offers very limited functionality in the programs it interprets.
 
 # 1. Language features
 ## 1.0 Language Building Blocks
-Mini-c code is always contained in a **Block** which has its own scope. A block is declared using `{ }`.
+Code is always contained in a **Block** which has its own scope. A block is declared using `{ }`.
 Each line of code, inside a block, ends in `;`.
 
 A sample structure looks like this:
@@ -42,9 +41,9 @@ Sample variable declarations include:
 ```
 
 ## 1.3 Expressions
-Expressions containe a few operators:
+Expressions contain several operators:
 * `+`, `-`, `*`, `/`: Addition, subtraction, multiplication and division between numbers (`int` or `dec`).  
-Expressions that affect numeric values are automatically cast to an apropriate type. Meaning that only if both operands are of type `int`, the result will be of type `int`. If one the operands is of type `dec`, then the result will be of type `dec`.
+Expressions that affect numeric values are automatically cast to an appropriate type. Meaning that only if both operands are of type `int`, the result will be of type `int`. If one of the operands is of type `dec`, then the result will be of type `dec`.
 
 * `+`: String concatenation if the left operand in an expression is of type `str`.
 
@@ -53,6 +52,8 @@ Expressions that affect numeric values are automatically cast to an apropriate t
 * `<`, `<=`, `>`, `>=`, `==`, `!=`: Comparison operands used to compare numbers (`int` or `dec`).
 
 * `==` or `!=`: Comparison operands for `str` comparison.
+
+* `()`: Parentheses for grouping expressions and controlling operator precedence.
 
 _See Variable assignment (1.4) for some samples._
 
@@ -80,6 +81,10 @@ Samples:
     someDec = someDec + 0.5;    // someDec is now 13.0
 
     someStr = "someDec: " + someDec; // someStr is "someDec: 13.0"
+
+    // Using parentheses to control operator precedence
+    someInt = (2 + 3) * 4;      // someInt is now 20
+    someInt = 2 + (3 * 4);      // someInt is now 14
 ```
 
 ## 1.5 If Control statements
@@ -173,6 +178,13 @@ Sample:
 
 The dice rolling results can be used in any expression, including variable assignments and print statements. The results are always of type `int`.
 
+## 1.9 Comments
+The language supports single-line comments using `//`:
+```
+// This is a comment
+int myVar;  // This is also a comment
+```
+
 # 2. Compiler compilation
 ## 2.1 Using `flex` and `bison` to compile
 The compiler is built using flex (lexical analyzer) and bison (parser generator). To compile the compiler:
@@ -182,7 +194,7 @@ The compiler is built using flex (lexical analyzer) and bison (parser generator)
 3. The compiler will be generated as `dnd-compiler.o`
 
 # 3. Running a program using the compiler
-To run a Mini-c program:
+To run a program:
 
 1. Write your program in a file with any extension (e.g., `program.dnd`)
 2. Run the compiler with your program file as input:
@@ -191,4 +203,9 @@ To run a Mini-c program:
    ```
 
 The compiler will interpret and execute your program, printing any output to the console.
+
+# 4. Sample Programs
+The repository includes two sample programs:
+- `sample_program.dnd`: Basic examples of language features
+- `edge_cases.dnd`: Examples of edge cases and complex expressions
 
