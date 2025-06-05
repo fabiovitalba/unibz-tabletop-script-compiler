@@ -210,86 +210,84 @@ The repository includes two sample programs in the `./samples/` folder:
 - `edge_cases.tts`: Examples of edge cases and complex expressions
 
 # 5. Language Grammar
-The following is the formal grammar of the language using Backus-Naur Form (BNF) notation:
+The following is the formal grammar of the language:
 
 ## 5.1 Program Structure
 ```
-program → block
+<program> → <block>
 
-block → '{' stmt_list '}'
+<block> → '{' <stmt_list> '}'
 
-stmt_list → statement
-         | statement stmt_list
-         | block
-         | block stmt_list
+<stmt_list> → <statement>
+            | <statement> <stmt_list>
+            | <block>
+            | <block> <stmt_list>
 
-statement → declaration ';'
-         | assignment ';'
-         | function_exec ';'
-         | if_stmt
+<statement> → <declaration> ';'
+            | <assignment> ';'
+            | <function_exec> ';'
+            | IF '(' <expression> ')' <block>
 ```
 
 ## 5.2 Declarations and Assignments
 ```
-declaration → T_INT_TOK ID_TOK
-           | T_DEC_TOK ID_TOK
-           | T_STR_TOK ID_TOK
+<declaration> → INT ID
+              | DEC ID
+              | STR ID
 
-assignment → ID_TOK '=' expression
-
-if_stmt → IF_TOK '(' expression ')' block
+<assignment> → <ID> '=' <expression>
 ```
 
 ## 5.3 Expressions
 ```
-expression → L_INT_TOK
-          | L_DEC_TOK
-          | L_STR_TOK
-          | DICE_TOK
-          | DICE_TOK ADV_TOK
-          | DICE_TOK DADV_TOK
-          | ID_TOK
-          | '(' expression ')'
-          | expression '+' expression
-          | expression '-' expression
-          | expression '*' expression
-          | expression '/' expression
-          | '-' expression
-          | expression GT_TOK expression
-          | expression GTOE_TOK expression
-          | expression LT_TOK expression
-          | expression LTOE_TOK expression
-          | expression EQ_TOK expression
-          | expression NEQ_TOK expression
+<expression> → INT_LITERAL
+             | DEC_LITERAL
+             | STR_LITERAL
+             | DICE
+             | DICE ADV
+             | DICE DADV
+             | ID
+             | '(' <expression> ')'
+             | <expression> '+' <expression>
+             | <expression> '-' <expression>
+             | <expression> '*' <expression>
+             | <expression> '/' <expression>
+             | '-' <expression>
+             | <expression> GT <expression>
+             | <expression> GTOE <expression>
+             | <expression> LT <expression>
+             | <expression> LTOE <expression>
+             | <expression> EQ <expression>
+             | <expression> NEQ <expression>
 ```
 
 ## 5.4 Function Calls
 ```
-function_exec → F_PRINT '(' expression ')'
-             | F_PRINTLN '(' expression ')'
+<function_exec> → PRINT '(' <expression> ')'
+                | PRINTLN '(' <expression> ')'
 ```
 
 ## 5.5 Terminals
 ```
-T_INT_TOK    → "int"
-T_DEC_TOK    → "dec"
-T_STR_TOK    → "str"
-IF_TOK       → "if"
-F_PRINT      → "prt"
-F_PRINTLN    → "prtln"
-ADV_TOK      → "adv"
-DADV_TOK     → "dadv"
-GT_TOK       → ">"
-GTOE_TOK     → ">="
-LT_TOK       → "<"
-LTOE_TOK     → "<="
-EQ_TOK       → "=="
-NEQ_TOK      → "!="
-L_INT_TOK    → [0-9]+
-L_DEC_TOK    → [0-9]+.[0-9]+
-L_STR_TOK    → "[^"]*"
-DICE_TOK     → [0-9]+[dD][0-9]+
-ID_TOK       → [a-zA-Z_][a-zA-Z0-9_]*
+INT         → "int"
+DEC         → "dec"
+STR         → "str"
+IF          → "if"
+PRINT       → "prt"
+PRINTLN     → "prtln"
+ADV         → "adv"
+DADV        → "dadv"
+GT          → ">"
+GTOE        → ">="
+LT          → "<"
+LTOE        → "<="
+EQ          → "=="
+NEQ         → "!="
+INT_LITERAL → [0-9]+
+DEC_LITERAL → [0-9]+.[0-9]+
+STR_LITERAL → "[^"]*"
+DICE        → [0-9]+[dD][0-9]+
+ID          → [a-zA-Z_][a-zA-Z0-9_]*
 ```
 
 ## 5.6 Operator Precedence
