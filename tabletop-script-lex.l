@@ -1,6 +1,6 @@
 %option noyywrap
 %{
-#include "dnd-compiler.tab.h"
+#include "tabletop-script-compiler.tab.h"
 #include <stdlib.h>
 
 int line_number = 1;

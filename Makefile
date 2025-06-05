@@ -1,4 +1,4 @@
 all:
-	flex -l dnd-lex.l;
-	bison -vd dnd-compiler.y;
-	gcc dnd-compiler.tab.c -ly -ll -o dnd-compiler.o
+	flex -l tabletop-script-lex.l;
+	bison -vd tabletop-script-compiler.y;
+	gcc tabletop-script-compiler.tab.c -ly -ll -o tabletop-script-compiler.o

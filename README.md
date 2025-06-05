@@ -1,5 +1,5 @@
-# Dungeons and Dragons Mini Language Compiler
-This project is a compiler for a custom language designed for Dungeons and Dragons-style tabletop role-playing games. It offers features for basic programming constructs and specialized dice rolling mechanics.
+# Tabletop Script Compiler
+This project is a compiler for a custom language designed for tabletop role-playing games like Dungeons and Dragons. It offers features for basic programming constructs and specialized dice rolling mechanics.
 
 # Index
 1. Language features
@@ -191,23 +191,23 @@ The compiler is built using flex (lexical analyzer) and bison (parser generator)
 
 1. Make sure you have flex and bison installed
 2. Run `make` in the project directory
-3. The compiler will be generated as `dnd-compiler.o`
+3. The compiler will be generated as `tabletop-script-compiler.o`
 
 # 3. Running a program using the compiler
 To run a program:
 
-1. Write your program in a file with any extension (e.g., `program.dnd`)
+1. Write your program in a file with any extension (e.g., `program.tts`)
 2. Run the compiler with your program file as input:
-   ```
-   ./dnd-compiler.o < program.dnd
-   ```
+```
+./tabletop-script-compiler.o < program.tts
+```
 
 The compiler will interpret and execute your program, printing any output to the console.
 
 # 4. Sample Programs
-The repository includes two sample programs:
-- `sample_program.dnd`: Basic examples of language features
-- `edge_cases.dnd`: Examples of edge cases and complex expressions
+The repository includes two sample programs in the `./samples/` folder:
+- `sample_program.tts`: Basic examples of language features
+- `edge_cases.tts`: Examples of edge cases and complex expressions
 
 # 5. Language Grammar
 The following is the formal grammar of the language using Backus-Naur Form (BNF) notation:
@@ -307,4 +307,3 @@ The following precedence rules apply (from highest to lowest):
 3. If the left operand is `str`, string concatenation is performed
 4. Comparison operators return `int` (1 for true, 0 for false)
 5. Dice rolls always return `int`
-
