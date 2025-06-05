@@ -235,7 +235,7 @@ The following is the formal grammar of the language:
               | DEC ID
               | STR ID
 
-<assignment> → <ID> '=' <expression>
+<assignment> → ID '=' <expression>
 ```
 
 ## 5.3 Expressions
