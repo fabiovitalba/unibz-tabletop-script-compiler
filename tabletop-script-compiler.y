@@ -79,12 +79,6 @@ int current_scope = 0;
 extern int yylineno; // used to track error line no.
 
 ////////////// Methods and Functions //////////////
-void yyerror(const char *s)
-{
-    fprintf(stderr, "%s on line %d\n", s, yylineno);
-    exit(1);
-}
-
 void enter_scope();
 void exit_scope();
 int hash(char* str);
@@ -111,6 +105,16 @@ int should_execute_stmt();
 runtime_value_t roll_dice_from_string(char* dice_text, dice_mod_t roll_mod);
 runtime_value_t roll_dice(int no_of_dice, int no_of_faces, dice_mod_t roll_mod);
 int yylex(void);
+
+void yyerror(const char *s)
+{
+    fprintf(stderr, "%s on line %d\n", s, yylineno);
+    // In case of an error, we have to free any allocated memory
+    while (current_scope > 0) {
+        exit_scope();
+    }
+    exit(1);
+}
 
 %}
 
