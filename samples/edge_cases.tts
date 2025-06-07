@@ -73,4 +73,23 @@
     prtln("Large dice roll = " + edgeRoll);
     edgeRoll = 10d1;  // Multiple minimum dice
     prtln("Multiple minimum dice = " + edgeRoll);
+
+    str str1;
+    str1 = "The apple on the tree";
+    str str2;
+    str2 = "the apple on the tree";
+    if (str1 != str2) {
+        prtln("#1: The strings aren't equal.");
+    }
+    if (str1 == str2) {
+        prtln("#1: The strings are equal.");
+    }
+
+    str2 = "The apple on the tree";
+    if (str1 != str2) {
+        prtln("#2: The strings aren't equal.");
+    }
+    if (str1 == str2) {
+        prtln("#2: The strings are equal.");
+    }
 } 
