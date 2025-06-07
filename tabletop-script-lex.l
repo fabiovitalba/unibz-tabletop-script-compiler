@@ -4,8 +4,6 @@
 %{
 #include "tabletop-script-compiler.tab.h"
 #include <stdlib.h>
-
-int line_number = 1;
 %}
 
 /* Building Blocks */
@@ -37,7 +35,7 @@ ID_TOK      {LETTER}{ALPHANUM}*
 "!="        { return NEQ_TOK; }
 
 [ ]         { /* skip blanks */ }
-\n          { /* skip newlines */ line_number++; }
+\n          { /* skip newlines */ }
 \t          { /* skip tabs */ }
 "//".*\n    { /* skip comment lines */ }
 
@@ -84,14 +82,10 @@ ID_TOK      {LETTER}{ALPHANUM}*
 
     /* Catch-all for unrecognized characters */
 .           {
-    printf("ERROR: Unrecognized character '%c' at line %d\n",
-           yytext[0], line_number);
+    printf("Lexer Error: Unrecognized character '%c' at line %d\n",
+           yytext[0], yylineno);
     return yytext[0];
 }
 
 %%
 
-/* Additional C code */
-void init_lexer() {
-    line_number = 1;
-}
