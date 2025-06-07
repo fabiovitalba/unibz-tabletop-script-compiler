@@ -6,13 +6,13 @@
 #include <time.h>
 #include <unistd.h>
 
-#define TEXT_COLOR_RED     "\x1b[31m"
-#define TEXT_COLOR_GREEN   "\x1b[32m"
-#define TEXT_COLOR_YELLOW  "\x1b[33m"
-#define TEXT_COLOR_BLUE    "\x1b[34m"
-#define TEXT_COLOR_MAGENTA "\x1b[35m"
-#define TEXT_COLOR_CYAN    "\x1b[36m"
-#define TEXT_COLOR_RESET   "\x1b[0m"
+#define TEXT_COLOR_RED     "\e[0;31m"
+#define TEXT_COLOR_GREEN   "\e[0;32m"
+#define TEXT_COLOR_YELLOW  "\e[0;33m"
+#define TEXT_COLOR_BLUE    "\e[0;34m"
+#define TEXT_COLOR_MAGENTA "\e[0;35m"
+#define TEXT_COLOR_CYAN    "\e[0;36m"
+#define TEXT_COLOR_RESET   "\e[0m"
 
 int DEBUG_MODE = 1;
 
