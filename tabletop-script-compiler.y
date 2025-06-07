@@ -204,17 +204,17 @@ expression : L_INT_TOK          { $$.type = TYPE_INTEGER; $$.value.ival = $1; }
                 }
            }
            | '(' expression ')'             { $$ = $2; }
+           | '-' expression                 { $$ = negate_expression($2); printf("eval negation\n"); }
+           | expression EQ_TOK expression   { $$ = compare_expressions($1,$3,OP_EQUAL); printf("eval equality\n"); }
+           | expression NEQ_TOK expression  { $$ = compare_expressions($1,$3,OP_NOT_EQUAL); }
+           | expression GT_TOK expression   { $$ = compare_expressions($1,$3,OP_GREATER); printf("eval greater\n"); }
+           | expression GTOE_TOK expression { $$ = compare_expressions($1,$3,OP_GREATER_EQUAL); }
+           | expression LT_TOK expression   { $$ = compare_expressions($1,$3,OP_LESS); }
+           | expression LTOE_TOK expression { $$ = compare_expressions($1,$3,OP_LESS_EQUAL); }
            | expression '+' expression      { $$ = add_expressions($1,$3); }
            | expression '-' expression      { $$ = mathematical_operation($1,$3,OP_SUBTRACTION); }
            | expression '*' expression      { $$ = mathematical_operation($1,$3,OP_MULTIPLICATION); }
            | expression '/' expression      { $$ = mathematical_operation($1,$3,OP_DIVISION); }
-           | '-' expression                 { $$ = negate_expression($2); }
-           | expression GT_TOK expression   { $$ = compare_expressions($1,$3,OP_GREATER); }
-           | expression GTOE_TOK expression { $$ = compare_expressions($1,$3,OP_GREATER_EQUAL); }
-           | expression LT_TOK expression   { $$ = compare_expressions($1,$3,OP_LESS); }
-           | expression LTOE_TOK expression { $$ = compare_expressions($1,$3,OP_LESS_EQUAL); }
-           | expression EQ_TOK expression   { $$ = compare_expressions($1,$3,OP_EQUAL); }
-           | expression NEQ_TOK expression  { $$ = compare_expressions($1,$3,OP_NOT_EQUAL); }
            ;
 
 %%
@@ -407,6 +407,11 @@ runtime_value_t negate_expression(runtime_value_t val) {
     }
     
     double numeric_val = get_numeric_value(val);
+    if (DEBUG_MODE) {
+        printf(TEXT_COLOR_BLUE);
+        printf("Negate: %f\n",numeric_val);
+        printf(TEXT_COLOR_RESET);
+    }
     if (val.type == TYPE_INTEGER) {
         return create_integer_value(-(int)numeric_val);
     }

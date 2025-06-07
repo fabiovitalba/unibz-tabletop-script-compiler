@@ -294,10 +294,10 @@ ID          → [a-zA-Z_][a-zA-Z0-9_]*
 The following precedence rules apply (from highest to lowest):
 1. Parentheses `()`
 2. Unary minus `-`
-3. Multiplication `*` and division `/`
-4. Addition `+` and subtraction `-`
-5. Comparison operators `<`, `<=`, `>`, `>=`
-6. Equality operators `==`, `!=`
+3. Equality operators `==`, `!=`
+4. Comparison operators `<`, `<=`, `>`, `>=`
+5. Multiplication `*` and division `/`
+6. Addition `+` and subtraction `-`
 
 ## 5.7 Type Conversion Rules
 1. If both operands are `int`, the result is `int`

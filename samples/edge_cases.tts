@@ -9,23 +9,26 @@
     int minInt;
     minInt = -2147483648;  // Minimum 32-bit integer
     prtln("minInt = " + minInt);
-    minInt = minInt - 1;  // Should wrap around
+    minInt = minInt -1;  // Should wrap around
     prtln("minInt after underflow = " + minInt);
 
     // Test decimal precision and rounding
     dec preciseDec;
     preciseDec = 3.14159265359;
-    prtln("preciseDec = " + preciseDec);  // Should show limited precision
+    prtln("preciseDec (3.141593) = " + preciseDec);  // Should show limited precision
 
     // Test complex arithmetic expressions
     dec complexMath;
     complexMath = (3.14 * 2.0) + (4.0 / 2.0) - (1.0 * 3.0);
-    prtln("complexMath = " + complexMath);
+    prtln("complexMath (5.280000) = " + complexMath);
 
     // Test nested arithmetic with parentheses
     int nestedMath;
     nestedMath = ((2 + 3) * 4) - (6 / 2);
-    prtln("nestedMath = " + nestedMath);
+    prtln("nestedMath (17) = " + nestedMath);
+
+    nestedMath = -(-9 -1) + -20;
+    prtln("nestedMath #2 (-10) = " + nestedMath);
 
     // Test string operations with numbers
     str numberString;
@@ -57,8 +60,8 @@
     // Test multiple operations in a single line
     int multiOp;
     multiOp = 5;
-    multiOp = multiOp + 1 * 2 - 3 / 1;
-    prtln("multiOp = " + multiOp);
+    multiOp = multiOp + 1 * 2 - 6 / 2;
+    prtln("multiOp (4) = " + multiOp);
 
     // Test string concatenation with mixed types
     str mixedString;
@@ -68,11 +71,11 @@
     // Test edge case dice rolls
     int edgeRoll;
     edgeRoll = 1d1;  // Minimum possible roll
-    prtln("Minimum roll = " + edgeRoll);
+    prtln("Minimum roll (1) = " + edgeRoll);
     edgeRoll = 1d100;  // Large dice
     prtln("Large dice roll = " + edgeRoll);
     edgeRoll = 10d1;  // Multiple minimum dice
-    prtln("Multiple minimum dice = " + edgeRoll);
+    prtln("Multiple minimum dice (10) = " + edgeRoll);
 
     str str1;
     str1 = "The apple on the tree";
@@ -92,4 +95,25 @@
     if (str1 == str2) {
         prtln("#2: The strings are equal.");
     }
-} 
+
+    int cmpEdgeCase;
+    cmpEdgeCase = 5 > 2 * 40;
+    // Should evaluate 5 > 2 = 1, then 1 * 40
+    prtln("cmpEdgeCase (40) = " + cmpEdgeCase);
+    
+    cmpEdgeCase = 25 * 3 > 1;
+    // Should evaluate 3 > 1 = 1, then 25 * 1
+    prtln("cmpEdgeCase (25) = " + cmpEdgeCase);
+    
+    // Should evaluate (1 == 1) = 1 (true)
+    // Then should evaluate (0 < 1) = 1 (true)
+    // Then should evaluate (50 * 1) = 50
+    cmpEdgeCase = 50 * 0 < 1 == 1;
+    prtln("cmpEdgeCase (50) = " + cmpEdgeCase);
+
+    cmpEdgeCase = -(-9 -1) > 20 == 20;
+    // Should evaluate (20 == 20) = 1 (true)
+    // Then should evaluate (-(-9 - 1)) = 10
+    // Then should evaluate (10 > 1) = 1 (true)
+    prtln("cmpEdgeCase (1) = " + cmpEdgeCase);
+}
