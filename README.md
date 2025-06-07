@@ -205,9 +205,13 @@ To run a program:
 The compiler will interpret and execute your program, printing any output to the console.
 
 # 4. Sample Programs
-The repository includes two sample programs in the `./samples/` folder:
+The repository includes several sample programs in the `./samples/` folder:
 - `sample_program.tts`: Basic examples of language features
 - `edge_cases.tts`: Examples of edge cases and complex expressions
+- `program_with_lexer_error.tts`: Example of a program with lexical analysis errors
+- `program_with_var_type_error.tts`: Example of a program with variable type errors
+- `program_with_wrong_syntax_error.tts`: Example of a program with syntax errors
+- `program_with_scope_error.tts`: Example of a program with scope-related errors
 
 # 5. Language Grammar
 The following is the formal grammar of the language:
