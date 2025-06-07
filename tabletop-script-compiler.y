@@ -153,6 +153,7 @@ int yylex(void);
 %left '*' '/'
 %left GT_TOK GTOE_TOK LT_TOK LTOE_TOK
 %left EQ_TOK NEQ_TOK
+%nonassoc UMINUS
 
 
 %%
@@ -204,10 +205,10 @@ expression : L_INT_TOK          { $$.type = TYPE_INTEGER; $$.value.ival = $1; }
                 }
            }
            | '(' expression ')'             { $$ = $2; }
-           | '-' expression                 { $$ = negate_expression($2); printf("eval negation\n"); }
-           | expression EQ_TOK expression   { $$ = compare_expressions($1,$3,OP_EQUAL); printf("eval equality\n"); }
+           | '-' expression %prec UMINUS    { $$ = negate_expression($2); }
+           | expression EQ_TOK expression   { $$ = compare_expressions($1,$3,OP_EQUAL); }
            | expression NEQ_TOK expression  { $$ = compare_expressions($1,$3,OP_NOT_EQUAL); }
-           | expression GT_TOK expression   { $$ = compare_expressions($1,$3,OP_GREATER); printf("eval greater\n"); }
+           | expression GT_TOK expression   { $$ = compare_expressions($1,$3,OP_GREATER); }
            | expression GTOE_TOK expression { $$ = compare_expressions($1,$3,OP_GREATER_EQUAL); }
            | expression LT_TOK expression   { $$ = compare_expressions($1,$3,OP_LESS); }
            | expression LTOE_TOK expression { $$ = compare_expressions($1,$3,OP_LESS_EQUAL); }
