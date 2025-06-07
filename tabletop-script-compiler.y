@@ -429,31 +429,55 @@ runtime_value_t mathematical_operation(runtime_value_t val1, runtime_value_t val
     double num2 = get_numeric_value(val2);
     double result;
 
-    switch(op) {
-        case OP_ADDITION:
-            result = num1 + num2;
-            break;
-        case OP_SUBTRACTION:
-            result = num1 - num2;
-            break;
-        case OP_MULTIPLICATION:
-            result = num1 * num2;
-            break;
-        case OP_DIVISION:
-            if (num2 == 0) {
-                yyerror("Division by zero");
+    // If both operands are integers, perform integer arithmetic
+    // This is necessary for edge cases with maximum or minimum value integers, which
+    // need to wrap around.
+    if (val1.type == TYPE_INTEGER && val2.type == TYPE_INTEGER) {
+        int int_result;
+        switch(op) {
+            case OP_ADDITION:
+                int_result = (int)num1 + (int)num2;
+                return create_integer_value(int_result);
+            case OP_SUBTRACTION:
+                int_result = (int)num1 - (int)num2;
+                return create_integer_value(int_result);
+            case OP_MULTIPLICATION:
+                int_result = (int)num1 * (int)num2;
+                return create_integer_value(int_result);
+            case OP_DIVISION:
+                if ((int)num2 == 0) {
+                    yyerror("Division by zero");
+                    return create_integer_value(0);
+                }
+                int_result = (int)num1 / (int)num2;
+                return create_integer_value(int_result);
+            default:
+                yyerror("Unknown operation");
                 return create_integer_value(0);
-            }
-            result = num1 / num2;
-            break;
-        default:
-            yyerror("Unknown operation");
-            return create_integer_value(0);
-    }
-
-    if (val1.type == TYPE_INTEGER && val2.type == TYPE_INTEGER && 
-        result == (int)result) {
-        return create_integer_value((int)result);
+        }
+    } else {
+        // For decimal operations or mixed integer/decimal operations
+        switch(op) {
+            case OP_ADDITION:
+                result = num1 + num2;
+                break;
+            case OP_SUBTRACTION:
+                result = num1 - num2;
+                break;
+            case OP_MULTIPLICATION:
+                result = num1 * num2;
+                break;
+            case OP_DIVISION:
+                if (num2 == 0) {
+                    yyerror("Division by zero");
+                    return create_integer_value(0);
+                }
+                result = num1 / num2;
+                break;
+            default:
+                yyerror("Unknown operation");
+                return create_integer_value(0);
+        }
     }
     
     return create_decimal_value(result);

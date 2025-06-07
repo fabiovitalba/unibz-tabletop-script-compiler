@@ -2,15 +2,15 @@
     // Test maximum and minimum integer values
     int maxInt;
     maxInt = 2147483647;  // Maximum 32-bit integer
-    prtln("maxInt = " + maxInt);
+    prtln("maxInt (2147483647) = " + maxInt);
     maxInt = maxInt + 1;  // Should wrap around
-    prtln("maxInt after overflow = " + maxInt);
+    prtln("maxInt after overflow (-2147483648) = " + maxInt);
 
     int minInt;
     minInt = -2147483648;  // Minimum 32-bit integer
-    prtln("minInt = " + minInt);
+    prtln("minInt (-2147483648) = " + minInt);
     minInt = minInt -1;  // Should wrap around
-    prtln("minInt after underflow = " + minInt);
+    prtln("minInt after underflow (2147483647) = " + minInt);
 
     // Test decimal precision and rounding
     dec preciseDec;
