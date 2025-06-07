@@ -1,0 +1,18 @@
+// This program defines a variable j in a nested scope.
+// The variable j is then accessed outside of its scope, which results in a run time error.
+{
+    int i;
+    i = 0;
+
+    if (i == 0) {
+        i = i + 1;
+    }
+
+    {
+        int j;
+        j = 2;
+        i = i + j;
+    }
+
+    prtln("j is out of scope: " + j);
+}

@@ -1,0 +1,6 @@
+// This program attempts to assign a string to an integer.
+// This fails because of a type error.
+{
+    int i;
+    i = "Some String";
+}

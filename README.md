@@ -1,5 +1,5 @@
-# Dungeons and Dragons Mini Language Compiler
-This project is a compiler for a custom language designed for Dungeons and Dragons-style tabletop role-playing games. It offers features for basic programming constructs and specialized dice rolling mechanics.
+# Tabletop Script Compiler
+This project is a compiler for a custom language designed for tabletop role-playing games like Dungeons and Dragons. It offers features for basic programming constructs and specialized dice rolling mechanics.
 
 # Index
 1. Language features
@@ -191,21 +191,121 @@ The compiler is built using flex (lexical analyzer) and bison (parser generator)
 
 1. Make sure you have flex and bison installed
 2. Run `make` in the project directory
-3. The compiler will be generated as `dnd-compiler.o`
+3. The compiler will be generated as `tabletop-script-compiler.o`
 
 # 3. Running a program using the compiler
 To run a program:
 
-1. Write your program in a file with any extension (e.g., `program.dnd`)
+1. Write your program in a file with any extension (e.g., `program.tts`)
 2. Run the compiler with your program file as input:
-   ```
-   ./dnd-compiler.o < program.dnd
-   ```
+```
+./tabletop-script-compiler.o < program.tts
+```
 
 The compiler will interpret and execute your program, printing any output to the console.
 
 # 4. Sample Programs
-The repository includes two sample programs:
-- `sample_program.dnd`: Basic examples of language features
-- `edge_cases.dnd`: Examples of edge cases and complex expressions
+The repository includes several sample programs in the `./samples/` folder:
+- `sample_program.tts`: Basic examples of language features
+- `edge_cases.tts`: Examples of edge cases and complex expressions
+- `program_with_lexer_error.tts`: Example of a program with lexical analysis errors
+- `program_with_var_type_error.tts`: Example of a program with variable type errors
+- `program_with_wrong_syntax_error.tts`: Example of a program with syntax errors
+- `program_with_scope_error.tts`: Example of a program with scope-related errors
 
+# 5. Language Grammar
+The following is the formal grammar of the language:
+
+## 5.1 Program Structure
+```
+<program> → <block>
+
+<block> → '{' <stmt_list> '}'
+
+<stmt_list> → <statement>
+            | <statement> <stmt_list>
+            | <block>
+            | <block> <stmt_list>
+
+<statement> → <declaration> ';'
+            | <assignment> ';'
+            | <function_exec> ';'
+            | IF '(' <expression> ')' <block>
+```
+
+## 5.2 Declarations and Assignments
+```
+<declaration> → INT ID
+              | DEC ID
+              | STR ID
+
+<assignment> → ID '=' <expression>
+```
+
+## 5.3 Expressions
+```
+<expression> → INT_LITERAL
+             | DEC_LITERAL
+             | STR_LITERAL
+             | DICE
+             | DICE ADV
+             | DICE DADV
+             | ID
+             | '(' <expression> ')'
+             | '-' <expression>
+             | <expression> EQ <expression>
+             | <expression> NEQ <expression>
+             | <expression> GT <expression>
+             | <expression> GTOE <expression>
+             | <expression> LT <expression>
+             | <expression> LTOE <expression>
+             | <expression> '+' <expression>
+             | <expression> '-' <expression>
+             | <expression> '*' <expression>
+             | <expression> '/' <expression>
+```
+
+## 5.4 Function Calls
+```
+<function_exec> → PRINT '(' <expression> ')'
+                | PRINTLN '(' <expression> ')'
+```
+
+## 5.5 Terminals
+```
+INT         → "int"
+DEC         → "dec"
+STR         → "str"
+IF          → "if"
+PRINT       → "prt"
+PRINTLN     → "prtln"
+ADV         → "adv"
+DADV        → "dadv"
+GT          → ">"
+GTOE        → ">="
+LT          → "<"
+LTOE        → "<="
+EQ          → "=="
+NEQ         → "!="
+INT_LITERAL → [0-9]+
+DEC_LITERAL → [0-9]+.[0-9]+
+STR_LITERAL → "[^"]*"
+DICE        → [0-9]+[dD][0-9]+
+ID          → [a-zA-Z_][a-zA-Z0-9_]*
+```
+
+## 5.6 Operator Precedence
+The following precedence rules apply (from highest to lowest):
+1. Parentheses `()`
+2. Unary minus `-`
+3. Equality operators `==`, `!=`
+4. Comparison operators `<`, `<=`, `>`, `>=`
+5. Multiplication `*` and division `/`
+6. Addition `+` and subtraction `-`
+
+## 5.7 Type Conversion Rules
+1. If both operands are `int`, the result is `int`
+2. If one operand is `dec`, the result is `dec`
+3. If the left operand is `str`, string concatenation is performed
+4. Comparison operators return `int` (1 for true, 0 for false)
+5. Dice rolls always return `int`

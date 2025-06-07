@@ -1,0 +1,6 @@
+// This program uses an emoji as a variable name, which the langue does not support.
+// Therefore the lexer throws an error during interpretation.
+{
+    int 🏖️;
+    🏖️ = 3;
+}

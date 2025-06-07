@@ -6,13 +6,13 @@
 #include <time.h>
 #include <unistd.h>
 
-#define TEXT_COLOR_RED     "\x1b[31m"
-#define TEXT_COLOR_GREEN   "\x1b[32m"
-#define TEXT_COLOR_YELLOW  "\x1b[33m"
-#define TEXT_COLOR_BLUE    "\x1b[34m"
-#define TEXT_COLOR_MAGENTA "\x1b[35m"
-#define TEXT_COLOR_CYAN    "\x1b[36m"
-#define TEXT_COLOR_RESET   "\x1b[0m"
+#define TEXT_COLOR_RED     "\e[0;31m"
+#define TEXT_COLOR_GREEN   "\e[0;32m"
+#define TEXT_COLOR_YELLOW  "\e[0;33m"
+#define TEXT_COLOR_BLUE    "\e[0;34m"
+#define TEXT_COLOR_MAGENTA "\e[0;35m"
+#define TEXT_COLOR_CYAN    "\e[0;36m"
+#define TEXT_COLOR_RESET   "\e[0m"
 
 int DEBUG_MODE = 1;
 
@@ -76,14 +76,9 @@ int if_condition_id = 0;
 
 int current_scope = 0;
 
+extern int yylineno; // used to track error line no.
 
 ////////////// Methods and Functions //////////////
-void yyerror(const char *s)
-{
-    fprintf(stderr, "%s\n", s);
-    exit(1);
-}
-
 void enter_scope();
 void exit_scope();
 int hash(char* str);
@@ -111,8 +106,19 @@ runtime_value_t roll_dice_from_string(char* dice_text, dice_mod_t roll_mod);
 runtime_value_t roll_dice(int no_of_dice, int no_of_faces, dice_mod_t roll_mod);
 int yylex(void);
 
+void yyerror(const char *s)
+{
+    fprintf(stderr, "%s on line %d\n", s, yylineno);
+    // In case of an error, we have to free any allocated memory
+    while (current_scope > 0) {
+        exit_scope();
+    }
+    exit(1);
+}
+
 %}
 
+%locations
 
 %union {
     int ivalue;
@@ -151,6 +157,7 @@ int yylex(void);
 %left '*' '/'
 %left GT_TOK GTOE_TOK LT_TOK LTOE_TOK
 %left EQ_TOK NEQ_TOK
+%nonassoc UMINUS
 
 
 %%
@@ -202,17 +209,17 @@ expression : L_INT_TOK          { $$.type = TYPE_INTEGER; $$.value.ival = $1; }
                 }
            }
            | '(' expression ')'             { $$ = $2; }
-           | expression '+' expression      { $$ = add_expressions($1,$3); }
-           | expression '-' expression      { $$ = mathematical_operation($1,$3,OP_SUBTRACTION); }
-           | expression '*' expression      { $$ = mathematical_operation($1,$3,OP_MULTIPLICATION); }
-           | expression '/' expression      { $$ = mathematical_operation($1,$3,OP_DIVISION); }
-           | '-' expression                 { $$ = negate_expression($2); }
+           | '-' expression %prec UMINUS    { $$ = negate_expression($2); }
+           | expression EQ_TOK expression   { $$ = compare_expressions($1,$3,OP_EQUAL); }
+           | expression NEQ_TOK expression  { $$ = compare_expressions($1,$3,OP_NOT_EQUAL); }
            | expression GT_TOK expression   { $$ = compare_expressions($1,$3,OP_GREATER); }
            | expression GTOE_TOK expression { $$ = compare_expressions($1,$3,OP_GREATER_EQUAL); }
            | expression LT_TOK expression   { $$ = compare_expressions($1,$3,OP_LESS); }
            | expression LTOE_TOK expression { $$ = compare_expressions($1,$3,OP_LESS_EQUAL); }
-           | expression EQ_TOK expression   { $$ = compare_expressions($1,$3,OP_EQUAL); }
-           | expression NEQ_TOK expression  { $$ = compare_expressions($1,$3,OP_NOT_EQUAL); }
+           | expression '+' expression      { $$ = add_expressions($1,$3); }
+           | expression '-' expression      { $$ = mathematical_operation($1,$3,OP_SUBTRACTION); }
+           | expression '*' expression      { $$ = mathematical_operation($1,$3,OP_MULTIPLICATION); }
+           | expression '/' expression      { $$ = mathematical_operation($1,$3,OP_DIVISION); }
            ;
 
 %%
@@ -280,7 +287,7 @@ int hash(char* str) {
 
 symbol_t* declare_new_symbol(char* name, variable_type_t type, int scope) {
     if (lookup_in_scope(name,scope) != NULL) {
-        yyerror("Variable already declared!");
+        yyerror("Variable already declared");
         return NULL;
     } else {
         insert_symbol(name,type,scope);
@@ -330,7 +337,7 @@ void verify_types_match(runtime_value_t val1, runtime_value_t val2) {
         if (val1.type == TYPE_STRING)
             return; // types can be matched as val2 will be converted to string.
 
-        yyerror("Type mismatch.");
+        yyerror("Type mismatch");
     }
 }
 
@@ -354,7 +361,7 @@ void print_val(runtime_value_t val, int new_line) {
             break;
         }
         default:
-            yyerror("Unsupported type for print.");
+            yyerror("Unsupported type for print");
     }
     if (new_line) {
         printf("\n");
@@ -405,6 +412,11 @@ runtime_value_t negate_expression(runtime_value_t val) {
     }
     
     double numeric_val = get_numeric_value(val);
+    if (DEBUG_MODE) {
+        printf(TEXT_COLOR_BLUE);
+        printf("Negate: %f\n",numeric_val);
+        printf(TEXT_COLOR_RESET);
+    }
     if (val.type == TYPE_INTEGER) {
         return create_integer_value(-(int)numeric_val);
     }
@@ -413,7 +425,7 @@ runtime_value_t negate_expression(runtime_value_t val) {
 
 runtime_value_t mathematical_operation(runtime_value_t val1, runtime_value_t val2, math_op_t op) {
     if (val1.type == TYPE_STRING || val2.type == TYPE_STRING) {
-        yyerror("str does not support this operation.");
+        yyerror("str type does not support this operation");
         return create_integer_value(0);
     }
 
@@ -421,31 +433,55 @@ runtime_value_t mathematical_operation(runtime_value_t val1, runtime_value_t val
     double num2 = get_numeric_value(val2);
     double result;
 
-    switch(op) {
-        case OP_ADDITION:
-            result = num1 + num2;
-            break;
-        case OP_SUBTRACTION:
-            result = num1 - num2;
-            break;
-        case OP_MULTIPLICATION:
-            result = num1 * num2;
-            break;
-        case OP_DIVISION:
-            if (num2 == 0) {
-                yyerror("Division by zero");
+    // If both operands are integers, perform integer arithmetic
+    // This is necessary for edge cases with maximum or minimum value integers, which
+    // need to wrap around.
+    if (val1.type == TYPE_INTEGER && val2.type == TYPE_INTEGER) {
+        int int_result;
+        switch(op) {
+            case OP_ADDITION:
+                int_result = (int)num1 + (int)num2;
+                return create_integer_value(int_result);
+            case OP_SUBTRACTION:
+                int_result = (int)num1 - (int)num2;
+                return create_integer_value(int_result);
+            case OP_MULTIPLICATION:
+                int_result = (int)num1 * (int)num2;
+                return create_integer_value(int_result);
+            case OP_DIVISION:
+                if ((int)num2 == 0) {
+                    yyerror("Division by zero");
+                    return create_integer_value(0);
+                }
+                int_result = (int)num1 / (int)num2;
+                return create_integer_value(int_result);
+            default:
+                yyerror("Unknown operation");
                 return create_integer_value(0);
-            }
-            result = num1 / num2;
-            break;
-        default:
-            yyerror("Unknown operation");
-            return create_integer_value(0);
-    }
-
-    if (val1.type == TYPE_INTEGER && val2.type == TYPE_INTEGER && 
-        result == (int)result) {
-        return create_integer_value((int)result);
+        }
+    } else {
+        // For decimal operations or mixed integer/decimal operations
+        switch(op) {
+            case OP_ADDITION:
+                result = num1 + num2;
+                break;
+            case OP_SUBTRACTION:
+                result = num1 - num2;
+                break;
+            case OP_MULTIPLICATION:
+                result = num1 * num2;
+                break;
+            case OP_DIVISION:
+                if (num2 == 0) {
+                    yyerror("Division by zero");
+                    return create_integer_value(0);
+                }
+                result = num1 / num2;
+                break;
+            default:
+                yyerror("Unknown operation");
+                return create_integer_value(0);
+        }
     }
     
     return create_decimal_value(result);
@@ -531,7 +567,7 @@ char* get_string_value(runtime_value_t val) {
             }
         }
     }
-    yyerror("Conversion to string impossible.");
+    yyerror("Conversion to string impossible");
     return NULL;
 }
 
@@ -613,7 +649,7 @@ void add_if_condition(int result) {
         if_condition_id++;
         if_condition_result[if_condition_id] = result;
     } else {
-        yyerror("Too many nested ifs, cannot track any more.");
+        yyerror("Too many nested ifs, cannot track any more");
     }
 }
 

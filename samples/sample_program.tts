@@ -1,3 +1,4 @@
+// This program showcases some functionalities that the language offers.
 {
     {
         int nestedInt;
