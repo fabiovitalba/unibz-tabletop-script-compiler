@@ -252,17 +252,17 @@ The following is the formal grammar of the language:
              | DICE DADV
              | ID
              | '(' <expression> ')'
-             | <expression> '+' <expression>
-             | <expression> '-' <expression>
-             | <expression> '*' <expression>
-             | <expression> '/' <expression>
              | '-' <expression>
+             | <expression> EQ <expression>
+             | <expression> NEQ <expression>
              | <expression> GT <expression>
              | <expression> GTOE <expression>
              | <expression> LT <expression>
              | <expression> LTOE <expression>
-             | <expression> EQ <expression>
-             | <expression> NEQ <expression>
+             | <expression> '+' <expression>
+             | <expression> '-' <expression>
+             | <expression> '*' <expression>
+             | <expression> '/' <expression>
 ```
 
 ## 5.4 Function Calls
