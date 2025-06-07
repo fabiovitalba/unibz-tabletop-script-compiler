@@ -1,0 +1,16 @@
+{
+    int i;
+    i = 0;
+
+    if (i == 0) {
+        i = i + 1;
+    }
+
+    {
+        int j;
+        j = 2;
+        i = i + j;
+    }
+
+    prtln("j is out of scope: " + j);
+}
