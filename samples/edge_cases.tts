@@ -1,3 +1,5 @@
+// This program tests the limits of the language and verifies that it behaves
+// correctly even in edge cases.
 {
     // Test maximum and minimum integer values
     int maxInt;
