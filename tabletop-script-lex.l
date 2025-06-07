@@ -1,11 +1,12 @@
 %option noyywrap
+%option yylineno
+
 %{
 #include "tabletop-script-compiler.tab.h"
 #include <stdlib.h>
 
 int line_number = 1;
 %}
-
 
 /* Building Blocks */
 DIGIT       [0-9]

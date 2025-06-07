@@ -76,11 +76,12 @@ int if_condition_id = 0;
 
 int current_scope = 0;
 
+extern int yylineno; // used to track error line no.
 
 ////////////// Methods and Functions //////////////
 void yyerror(const char *s)
 {
-    fprintf(stderr, "%s\n", s);
+    fprintf(stderr, "%s on line %d\n", s, yylineno);
     exit(1);
 }
 
@@ -113,6 +114,7 @@ int yylex(void);
 
 %}
 
+%locations
 
 %union {
     int ivalue;
@@ -280,7 +282,7 @@ int hash(char* str) {
 
 symbol_t* declare_new_symbol(char* name, variable_type_t type, int scope) {
     if (lookup_in_scope(name,scope) != NULL) {
-        yyerror("Variable already declared!");
+        yyerror("Variable already declared");
         return NULL;
     } else {
         insert_symbol(name,type,scope);
@@ -330,7 +332,7 @@ void verify_types_match(runtime_value_t val1, runtime_value_t val2) {
         if (val1.type == TYPE_STRING)
             return; // types can be matched as val2 will be converted to string.
 
-        yyerror("Type mismatch.");
+        yyerror("Type mismatch");
     }
 }
 
@@ -354,7 +356,7 @@ void print_val(runtime_value_t val, int new_line) {
             break;
         }
         default:
-            yyerror("Unsupported type for print.");
+            yyerror("Unsupported type for print");
     }
     if (new_line) {
         printf("\n");
@@ -413,7 +415,7 @@ runtime_value_t negate_expression(runtime_value_t val) {
 
 runtime_value_t mathematical_operation(runtime_value_t val1, runtime_value_t val2, math_op_t op) {
     if (val1.type == TYPE_STRING || val2.type == TYPE_STRING) {
-        yyerror("str does not support this operation.");
+        yyerror("str type does not support this operation");
         return create_integer_value(0);
     }
 
@@ -531,7 +533,7 @@ char* get_string_value(runtime_value_t val) {
             }
         }
     }
-    yyerror("Conversion to string impossible.");
+    yyerror("Conversion to string impossible");
     return NULL;
 }
 
@@ -613,7 +615,7 @@ void add_if_condition(int result) {
         if_condition_id++;
         if_condition_result[if_condition_id] = result;
     } else {
-        yyerror("Too many nested ifs, cannot track any more.");
+        yyerror("Too many nested ifs, cannot track any more");
     }
 }
 

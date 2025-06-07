@@ -1,0 +1,4 @@
+{
+    int i;
+    i = "Some String";
+}
