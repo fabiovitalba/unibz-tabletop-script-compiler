@@ -450,7 +450,9 @@ runtime_value_t add_expressions(runtime_value_t val1, runtime_value_t val2) {
 }
 
 /**
-* 
+* This method can only be called on values val of type int or dec.
+* It takes the numeric value of the value and returns the negative value of it.
+* If a str value was proided, an error is thrown.
 */
 runtime_value_t negate_expression(runtime_value_t val) {
     if (val.type == TYPE_STRING) {
@@ -470,6 +472,13 @@ runtime_value_t negate_expression(runtime_value_t val) {
     return create_decimal_value(-numeric_val);
 }
 
+/**
+* Takes two operands val1 and val2 and executes the operation provided in op on them.
+* If either val1 or val2 is of type str, an error is thrown.
+* If both operands are of type int, the operation is done with the int-data type.
+* In all other cases, the operation is done with the double-data type.
+* The result of the operation with its data type is returned.
+*/
 runtime_value_t mathematical_operation(runtime_value_t val1, runtime_value_t val2, math_op_t op) {
     if (val1.type == TYPE_STRING || val2.type == TYPE_STRING) {
         yyerror("str type does not support this operation");
@@ -534,6 +543,11 @@ runtime_value_t mathematical_operation(runtime_value_t val1, runtime_value_t val
     return create_decimal_value(result);
 }
 
+/**
+* Handles type conversion between the three data types.
+* If the passed value val is already of the correct type, the value val is returned.
+* In other cases the value is converted to the data type provided in new_type and returned.
+*/
 runtime_value_t convert_to_type(runtime_value_t val, variable_type_t new_type) {
     if (val.type == new_type) {
         return val;
@@ -567,6 +581,9 @@ runtime_value_t convert_to_type(runtime_value_t val, variable_type_t new_type) {
     return create_integer_value(0);
 }
 
+/**
+* Creates a runtime_value_t using the provided int value.
+*/
 runtime_value_t create_integer_value(int value) {
     runtime_value_t result;
     result.type = TYPE_INTEGER;
@@ -574,6 +591,9 @@ runtime_value_t create_integer_value(int value) {
     return result;
 }
 
+/**
+* Creates a runtime_value_t using the provided double value.
+*/
 runtime_value_t create_decimal_value(double value) {
     runtime_value_t result;
     result.type = TYPE_DECIMAL;
@@ -581,6 +601,10 @@ runtime_value_t create_decimal_value(double value) {
     return result;
 }
 
+
+/**
+* Creates a runtime_value_t using the provided char* value.
+*/
 runtime_value_t create_string_value(char* value) {
     runtime_value_t result;
     result.type = TYPE_STRING;
@@ -588,6 +612,10 @@ runtime_value_t create_string_value(char* value) {
     return result;
 }
 
+/**
+* Returns a numeric value of type double from the provided value val.
+* It is cast to double in case of integer.
+*/
 double get_numeric_value(runtime_value_t val) {
     if (val.type == TYPE_INTEGER) {
         return (double)val.value.ival;
@@ -595,6 +623,10 @@ double get_numeric_value(runtime_value_t val) {
     return val.value.dval;
 }
 
+/**
+* Converts the provided value val to string using the sprintf() function.
+* In case of undefined strings, it returns the string literal "(undefined)".
+*/
 char* get_string_value(runtime_value_t val) {
     char buffer[100]; // 100 is enough for both double and integer
     switch(val.type) {
@@ -618,6 +650,12 @@ char* get_string_value(runtime_value_t val) {
     return NULL;
 }
 
+/**
+* Compares the values val1 and val2 using the provided comparison operator op.
+* If either va11 or val2 are of type string, then only the comparison operators == and != may be used.
+* The result of the comparison is an integer value of 0 if the comparison is incorrect and 1 
+* if the comparison is correct.
+*/
 runtime_value_t compare_expressions(runtime_value_t val1, runtime_value_t val2, math_op_t op) {
     if (val1.type == TYPE_STRING || val2.type == TYPE_STRING) {
         // Strings can only be compared in equality or inequality
@@ -671,6 +709,11 @@ runtime_value_t compare_expressions(runtime_value_t val1, runtime_value_t val2, 
     return create_integer_value(result);
 }
 
+/**
+* Returns the integer 0 if the provided value is of numeric type and is 0.
+* Returns the integer 0 if the provided value is of string type and is NULL. (undefined)
+* Returns the integer 1 in all other cases.
+*/
 int expression_is_true(runtime_value_t val) {
     if (DEBUG_MODE) {
         printf(TEXT_COLOR_MAGENTA);
@@ -685,6 +728,10 @@ int expression_is_true(runtime_value_t val) {
     }
 }
 
+/**
+* Increments the if_condition_id by 1.
+* Adds the result for an if condition to the if_condition_result stack.
+*/
 void add_if_condition(int result) {
     if (DEBUG_MODE) {
         printf(TEXT_COLOR_MAGENTA);
@@ -700,6 +747,9 @@ void add_if_condition(int result) {
     }
 }
 
+/**
+* Decrements the if_condition_id by 1.
+*/
 void pop_if_condition() {
     if (DEBUG_MODE) {
         printf(TEXT_COLOR_MAGENTA);
@@ -714,10 +764,21 @@ void pop_if_condition() {
     }
 }
 
+/**
+* Checks the current if_condition_result (stack) value.
+* If the current if condition evaluated to 1, then this will return 1. (true)
+* In other cases returns 0. (false)
+*/
 int should_execute_stmt() {
     return if_condition_result[if_condition_id];
 }
 
+/**
+* Receives a string of form NdM in the variable dice_text.
+* Also receives the modality of the roll in the variable roll_mod.
+* This method calculates the number of dice to roll and their faces then calls
+* the method roll_dice().
+*/
 runtime_value_t roll_dice_from_string(char* dice_text, dice_mod_t roll_mod) {
     int no_of_dice = 0;
     int no_of_faces = 0;
@@ -749,6 +810,13 @@ runtime_value_t roll_dice_from_string(char* dice_text, dice_mod_t roll_mod) {
     return roll_dice(no_of_dice, no_of_faces, roll_mod);
 }
 
+/**
+* Rolls the no_of_dice dices of no_of_faces faces with provided roll_mod modality.
+* The rolled number is integer and is calculated using the rand() function.
+* For rolls of ADV type, each roll is done twice and the better result is taken.
+* For rolls of DADV type, each roll is done twice and the worse result is taken.
+* Returns a value of type int with the combined value of rolled values.
+*/
 runtime_value_t roll_dice(int no_of_dice, int no_of_faces, dice_mod_t roll_mod) {
     if (DEBUG_MODE) {
         printf(TEXT_COLOR_BLUE);
@@ -793,6 +861,7 @@ int main(void)
 {
     // Initialize random seed with a combination of time and process ID for better entropy
     srand(time(0));
-    if_condition_result[if_condition_id] = 1; // we start with true, otherwise nothing is executed
+    // we start the if_condition_result stack with true, otherwise nothing is executed
+    if_condition_result[if_condition_id] = 1;
     return yyparse();
 }
