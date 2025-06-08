@@ -271,7 +271,7 @@ The following is the formal grammar of the language:
                 | PRINTLN '(' <expression> ')'
 ```
 
-## 5.5 Terminals
+## 5.5 Regular Definitions
 ```
 INT         → "int"
 DEC         → "dec"
