@@ -40,21 +40,26 @@ ID_TOK      {LETTER}{ALPHANUM}*
 "//".*\n    { /* skip comment lines */ }
 
 [0-9]+[dD][0-9]+    {
+    // Duplicate the received string in order to keep it
     yylval.svalue = strdup(yytext);
     return DICE_TOK;
 }
 
 {INTEGER}   {
+    // Convert the received text value to int
     yylval.ivalue = atoi(yytext);
     return L_INT_TOK;
 }
 
 {REAL}      {
+    // Convert the received text value to double
     yylval.dvalue = atof(yytext);
     return L_DEC_TOK;
 }
 
 \"[^\"]*\"  {
+    // We have to remove the leading and ending quotes (") from the string.
+    // Then we also have to copy the string from yytext as it will be overwritten
     int len = strlen(yytext) - 2;
     yylval.svalue = malloc(len + 1);
     strncpy(yylval.svalue, yytext + 1, len);
@@ -63,7 +68,8 @@ ID_TOK      {LETTER}{ALPHANUM}*
 }
 
 {ID_TOK}        {
-    yylval.svalue = strdup(yytext); // duplicate string, since yytext is overwritten constantly
+    // We have to duplicate the string, since yytext is overwritten constantly
+    yylval.svalue = strdup(yytext);
     return ID_TOK;
 }
 

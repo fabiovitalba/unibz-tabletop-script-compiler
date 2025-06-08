@@ -6,6 +6,7 @@
 #include <time.h>
 #include <unistd.h>
 
+// Colors used in DEBUG_MODE logging
 #define TEXT_COLOR_RED     "\e[0;31m"
 #define TEXT_COLOR_GREEN   "\e[0;32m"
 #define TEXT_COLOR_YELLOW  "\e[0;33m"
@@ -14,7 +15,7 @@
 #define TEXT_COLOR_CYAN    "\e[0;36m"
 #define TEXT_COLOR_RESET   "\e[0m"
 
-int DEBUG_MODE = 1;
+int DEBUG_MODE = 0; // Set to 1 to enable, 0 to disable additional logging
 
 ////////////// Symbol Table definitions //////////////
 typedef enum {
@@ -74,6 +75,9 @@ The if_tracker_stack keeps track of which if conditions evaluated to true and wh
 int if_condition_result[IF_TRACKER_SIZE];
 int if_condition_id = 0;
 
+/*
+current_scope keeps track of the currently active scope ID
+*/
 int current_scope = 0;
 
 extern int yylineno; // used to track error line no.
@@ -124,7 +128,7 @@ void yyerror(const char *s)
     int ivalue;
     double dvalue;
     char* svalue;
-    symbol_t *symbol;
+    symbol_t* symbol;
     runtime_value_t value;
 }
 
@@ -228,6 +232,9 @@ expression : L_INT_TOK          { $$.type = TYPE_INTEGER; $$.value.ival = $1; }
 #include "lex.yy.c"
 
 
+/**
+* Increments the scope ID
+*/
 void enter_scope() {
     current_scope++;
 
@@ -238,6 +245,10 @@ void enter_scope() {
     }
 }
 
+/**
+* Frees any allocated memory from the current scope. Then reduces the scope ID by 1.
+* Updates the next-pointer where necessary before symbols are freed.
+*/
 void exit_scope() {
     if (DEBUG_MODE) {
         printf(TEXT_COLOR_YELLOW);
@@ -285,6 +296,11 @@ int hash(char* str) {
     return hash % HASH_SIZE;
 }
 
+/**
+* Used to declare new symbols that have to be stored in the symbol table.
+* Throws an error if the symbol is already present in the symbol table.
+* Otherwise returns the symbol struct.
+*/
 symbol_t* declare_new_symbol(char* name, variable_type_t type, int scope) {
     if (lookup_in_scope(name,scope) != NULL) {
         yyerror("Variable already declared");
@@ -295,12 +311,17 @@ symbol_t* declare_new_symbol(char* name, variable_type_t type, int scope) {
     }
 }
 
+/**
+* Searches for the provided (symbol) name in the provided scope.
+* If the symbol cannot be found in the provided scope, the scope is reduced until it reaches 1.
+* If the symbol can be found in lower scopes, it is returned. In other cases NULL is returned instead.
+*/
 symbol_t* lookup_in_scope(char* name, int scope) {
     int lookup_scope = scope;
     int h = hash(name);
     symbol_t* sym = symbol_table[h];
 
-    while (lookup_scope >= 0) {
+    while (lookup_scope > 0) {
         if (DEBUG_MODE) {
             printf(TEXT_COLOR_CYAN);
             printf("looking up %s (scope %d)\n", name, lookup_scope);
@@ -319,6 +340,9 @@ symbol_t* lookup_in_scope(char* name, int scope) {
     return NULL;
 }
 
+/**
+* Adds the provided symbol name and type to the symbol table indicating the provided scope ID.
+*/
 void insert_symbol(char* name, variable_type_t type, int scope) {
     int h = hash(name);
     symbol_t* new_sym = malloc(sizeof(symbol_t));
@@ -329,6 +353,10 @@ void insert_symbol(char* name, variable_type_t type, int scope) {
     symbol_table[h] = new_sym;
 }
 
+/**
+* Verifies if the value provided in val2 is compatible with the variable data type of val1.
+* Throws an error if the types are incompatible.
+*/
 void verify_types_match(runtime_value_t val1, runtime_value_t val2) {
     if (val1.type != val2.type) {
         if (((val1.type == TYPE_INTEGER) && (val2.type == TYPE_DECIMAL)) || ((val1.type == TYPE_DECIMAL) && (val2.type == TYPE_INTEGER)))
@@ -341,11 +369,20 @@ void verify_types_match(runtime_value_t val1, runtime_value_t val2) {
     }
 }
 
+/**
+* Assigns the provided value val to the provided symbol sym.
+* Before assigning the value, a type check is performed, which throws an error if 
+* the value val is incompatible with the type of symbol sym.
+*/
 void assign_symbol(symbol_t *sym, runtime_value_t val) {
     verify_types_match(sym->value,val);
     sym->value = convert_to_type(val,sym->value.type);
 }
 
+/**
+* Executes a printf function using the provided value val.
+* If new_line is != 0, then a newline is appended at the end.
+*/
 void print_val(runtime_value_t val, int new_line) {
     switch(val.type) {
         case TYPE_INTEGER: {
@@ -368,6 +405,13 @@ void print_val(runtime_value_t val, int new_line) {
     }
 }
 
+/**
+* Adds the two run time values val1 and val2 together.
+* Before adding the values, a type check is performed. If the value in val2 
+* is not compatible with the value type of val1, then an error is thrown.
+* If val1 is of type str, then a string concatenation is performed.
+* If the operation was successful, the operation result is returned.
+*/
 runtime_value_t add_expressions(runtime_value_t val1, runtime_value_t val2) {
     verify_types_match(val1,val2);
     runtime_value_t result;
@@ -405,6 +449,9 @@ runtime_value_t add_expressions(runtime_value_t val1, runtime_value_t val2) {
     return result;
 }
 
+/**
+* 
+*/
 runtime_value_t negate_expression(runtime_value_t val) {
     if (val.type == TYPE_STRING) {
         yyerror("Unsupported type for negation");
