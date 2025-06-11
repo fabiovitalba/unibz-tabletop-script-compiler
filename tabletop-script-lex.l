@@ -34,10 +34,24 @@ ID_TOK      {LETTER}{ALPHANUM}*
 "=="        { return EQ_TOK; }
 "!="        { return NEQ_TOK; }
 
+    /* Tokens to skip */
 [ ]         { /* skip blanks */ }
 \n          { /* skip newlines */ }
 \t          { /* skip tabs */ }
 "//".*\n    { /* skip comment lines */ }
+
+    /* Operators, Scopes and Delimiters */
+"+"         { return '+'; }
+"-"         { return '-'; }
+"*"         { return '*'; }
+"/"         { return '/'; }
+"{"         { return '{'; }
+"}"         { return '}'; }
+"("         { return '('; }
+")"         { return ')'; }
+"="         { return '='; }
+"\""        { return '"'; }
+";"         { return ';'; }
 
 [0-9]+[dD][0-9]+    {
     // Duplicate the received string in order to keep it
@@ -72,19 +86,6 @@ ID_TOK      {LETTER}{ALPHANUM}*
     yylval.svalue = strdup(yytext);
     return ID_TOK;
 }
-
-    /* Operators, Scopes and Delimiters */
-"+"         { return '+'; }
-"-"         { return '-'; }
-"*"         { return '*'; }
-"/"         { return '/'; }
-"{"         { return '{'; }
-"}"         { return '}'; }
-"("         { return '('; }
-")"         { return ')'; }
-"="         { return '='; }
-"\""        { return '"'; }
-";"         { return ';'; }
 
     /* Catch-all for unrecognized characters */
 .           {
