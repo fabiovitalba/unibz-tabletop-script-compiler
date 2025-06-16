@@ -9,7 +9,7 @@
 /* Building Blocks */
 DIGIT       [0-9]
 INTEGER     {DIGIT}+
-REAL        {INTEGER}(\.{DIGIT}+)?
+REAL        {INTEGER}\.{DIGIT}+
 LETTER      [a-zA-Z_]
 ALPHANUM    [a-zA-Z0-9_]
 ID_TOK      {LETTER}{ALPHANUM}*
