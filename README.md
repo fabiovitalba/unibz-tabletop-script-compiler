@@ -134,6 +134,14 @@ Sample:
         int innerVar;
         innerVar = 20;
         prtln(outerVar);  // Can access outerVar
+
+        {
+            dec innerVar;
+            innerVar = 1.0;
+            prtln(innerVar);    // This will print 1.0
+        }
+
+        prtln(innerVar);    // This will print 20
     }
     
     prtln(innerVar);  // Error: innerVar is not accessible here
