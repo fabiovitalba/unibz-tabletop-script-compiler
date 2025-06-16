@@ -85,7 +85,7 @@ extern int yylineno; // used to track error line no.
 ////////////// Methods and Functions //////////////
 void enter_scope();
 void exit_scope();
-int hash(char* str);
+int hash(int scope);
 symbol_t* declare_new_symbol(char* name, variable_type_t type, int scope);
 symbol_t* lookup_in_scope(char* name, int scope);
 symbol_t* lookup(char* name, int scope);
@@ -258,24 +258,22 @@ void exit_scope() {
     }
 
     // Remove all symbols at current scope level
-    for (int i = 0; i < HASH_SIZE; i++) {
-        symbol_t** sym_ptr = &symbol_table[i];
-        while (*sym_ptr) {
-            if ((*sym_ptr)->scope_level == current_scope) {
-                symbol_t* to_remove = *sym_ptr;
-                *sym_ptr = (*sym_ptr)->next;
-                
-                if (DEBUG_MODE) {
-                    printf(TEXT_COLOR_RED);
-                    printf("Removing symbol: %s (scope %d)\n", to_remove->name, to_remove->scope_level);
-                    printf(TEXT_COLOR_RESET);
-                }
+    symbol_t** sym_ptr = &symbol_table[hash(current_scope)];
+    while(*sym_ptr) {
+        if ((*sym_ptr)->scope_level == current_scope) {
+            symbol_t* to_remove = *sym_ptr;
+            *sym_ptr = (*sym_ptr)->next;
 
-                free(to_remove->name);
-                free(to_remove);
-            } else {
-                sym_ptr = &((*sym_ptr)->next);
+            if (DEBUG_MODE) {
+                printf(TEXT_COLOR_RED);
+                printf("Removing symbol: %s (scope %d)\n", to_remove->name, to_remove->scope_level);
+                printf(TEXT_COLOR_RESET);
             }
+
+            free(to_remove->name);
+            free(to_remove);
+        } else {
+            sym_ptr = &((*sym_ptr)->next);
         }
     }
 
@@ -283,18 +281,14 @@ void exit_scope() {
 }
 
 /**
-* This hash function takes the name of a symbol and returns an ID_TOK to be used
-* within the symbol table array. This distributes the symbols evenly within
-* the hash table.
+* This hash function takes the scope of a symbol and returns an ID to be used within
+* the hash table to store the symbol.
 * We multiply by 31 (prime number) in order to have a better distribution of
 * values within the hash table.
 */
-int hash(char* str) {
+int hash(int scope) {
     unsigned int hash = 0;
-    while (*str) {
-        hash = hash * 31 + *str++;
-    }
-    return hash % HASH_SIZE;
+    return scope % HASH_SIZE;
 }
 
 /**
@@ -318,7 +312,7 @@ symbol_t* declare_new_symbol(char* name, variable_type_t type, int scope) {
 */
 symbol_t* lookup_in_scope(char* name, int scope) {
     int lookup_scope = scope;
-    int h = hash(name);
+    int h = hash(scope);
     symbol_t* sym = symbol_table[h];
 
     while (lookup_scope > 0) {
@@ -347,8 +341,7 @@ symbol_t* lookup_in_scope(char* name, int scope) {
 */
 symbol_t* lookup(char* name, int scope) {
     int lookup_scope = scope;
-    int h = hash(name);
-    symbol_t* sym = symbol_table[h];
+    symbol_t* sym = symbol_table[hash(scope)];
 
     while (lookup_scope > 0) {
         if (DEBUG_MODE) {
@@ -364,7 +357,7 @@ symbol_t* lookup(char* name, int scope) {
             sym = sym->next;
         }
         lookup_scope--;
-        sym = symbol_table[h];
+        sym = symbol_table[hash(lookup_scope)];
     }
     return NULL;
 }
@@ -373,7 +366,7 @@ symbol_t* lookup(char* name, int scope) {
 * Adds the provided symbol name and type to the symbol table indicating the provided scope ID.
 */
 symbol_t* insert_symbol(char* name, variable_type_t type, int scope) {
-    int h = hash(name);
+    int h = hash(scope);
     symbol_t* new_sym = malloc(sizeof(symbol_t));
     new_sym->name = strdup(name);
     new_sym->value.type = type;

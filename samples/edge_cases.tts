@@ -129,4 +129,24 @@
     // Then should evaluate (-(-9 - 1)) = 10
     // Then should evaluate (10 > 1) = 1 (true)
     prtln("cmpEdgeCase (1) = " + cmpEdgeCase);
+
+    int var_in_scope;
+    var_in_scope = 32;
+    prtln("PRE: var_in_scope (32) = " + var_in_scope);
+
+    {
+        str var_in_scope;
+        var_in_scope = "Sepp";
+        prtln("PRE: var_in_scope ('Sepp') = " + var_in_scope);
+
+        {
+            dec var_in_scope;
+            var_in_scope = 4.2069;
+            prtln("PRE: var_in_scope (4.206900) = " + var_in_scope);
+        }
+
+        prtln("POST: var_in_scope ('Sepp') = " + var_in_scope);
+    }
+
+    prtln("POST: var_in_scope (32) = " + var_in_scope);
 }
